@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\dev\materia\build\_deps\doctest-subbuild\CMakeFiles\5571665c789bacb72ff70b321460cf9d\doctest-populate-mkdir.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\dev\materia\build\_deps\doctest-subbuild\CMakeFiles\5571665c789bacb72ff70b321460cf9d\doctest-populate-download.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\dev\materia\build\_deps\doctest-subbuild\CMakeFiles\5571665c789bacb72ff70b321460cf9d\doctest-populate-update.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\dev\materia\build\_deps\doctest-subbuild\CMakeFiles\5571665c789bacb72ff70b321460cf9d\doctest-populate-patch.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\dev\materia\build\_deps\doctest-subbuild\CMakeFiles\5571665c789bacb72ff70b321460cf9d\doctest-populate-configure.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\dev\materia\build\_deps\doctest-subbuild\CMakeFiles\5571665c789bacb72ff70b321460cf9d\doctest-populate-build.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\dev\materia\build\_deps\doctest-subbuild\CMakeFiles\5571665c789bacb72ff70b321460cf9d\doctest-populate-install.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\dev\materia\build\_deps\doctest-subbuild\CMakeFiles\5571665c789bacb72ff70b321460cf9d\doctest-populate-test.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\dev\materia\build\_deps\doctest-subbuild\CMakeFiles\7a4c657dd755e18095098dd7b053de0a\doctest-populate-complete.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\dev\materia\build\_deps\doctest-subbuild\CMakeFiles\22f9ffc461995528152df40156a3dae6\doctest-populate.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\dev\materia\build\_deps\doctest-subbuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="D:\dev\materia\build\_deps\doctest-subbuild\CMakeFiles\doctest-populate" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{6164B3DC-38B0-31C6-BAAB-8A556E174730}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,14 @@
+# ignore visual studio files
+.vs/
+Debug/
+Release/
+x64/
+
+# ignore obj folder for CS projects
+project/AtmaCS/obj/
+
+*.opensdf
+*.suo
+*.sdf
+*.user
+*.lib

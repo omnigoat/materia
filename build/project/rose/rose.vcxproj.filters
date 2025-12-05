@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\dev\atma2\projects\rose\src\runtime.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\rose\src\windows\console.cpp">
+      <Filter>src\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\rose\src\windows\file.cpp">
+      <Filter>src\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\rose\src\windows\mmap.cpp">
+      <Filter>src\windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\dev\atma2\projects\rose\include\rose\console.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\rose\include\rose\file.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\rose\include\rose\mmap.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\rose\include\rose\path.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\rose\include\rose\rose_fwd.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\rose\include\rose\runtime.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\dev\atma2\projects\rose\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{00684D31-EC78-38D2-9ADC-9AEDB3B8D6C9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{09E96B0E-47D2-3D37-BC11-290D5E18C99D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\windows">
+      <UniqueIdentifier>{B9749E95-B107-37FD-BC90-724E89E054A7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

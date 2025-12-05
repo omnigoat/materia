@@ -1,0 +1,270 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\dev\atma2\projects\atma\src\atma_test\bind_and_function.cpp">
+      <Filter>src\atma_test</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\src\atma_test\entrypoint.cpp">
+      <Filter>src\atma_test</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\src\atma_test\memory.cpp">
+      <Filter>src\atma_test</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\src\atma_test\queue.cpp">
+      <Filter>src\atma_test</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\src\atma_test\ranges.cpp">
+      <Filter>src\atma_test</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\src\atma_test\test_allocators.cpp">
+      <Filter>src\atma_test</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\src\atma_test\test_atomics.cpp">
+      <Filter>src\atma_test</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\src\atma_test\test_events.cpp">
+      <Filter>src\atma_test</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\src\atma_test\test_pointers.cpp">
+      <Filter>src\atma_test</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\src\atma_test\test_rope.cpp">
+      <Filter>src\atma_test</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\src\atma_test\test_utf8_string.cpp">
+      <Filter>src\atma_test</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\src\atma_test\test_vector.cpp">
+      <Filter>src\atma_test</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\modules\aligned_allocator.cppm">
+      <Filter>modules</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\modules\assert.cppm">
+      <Filter>modules</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\modules\atomic.cppm">
+      <Filter>modules</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\modules\benchmark.cppm">
+      <Filter>modules</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\modules\bind.cppm">
+      <Filter>modules</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\modules\intrusive_ptr.cppm">
+      <Filter>modules</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\modules\lockfree_queue.cppm">
+      <Filter>modules</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\modules\memory.cppm">
+      <Filter>modules</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\modules\meta.cppm">
+      <Filter>modules</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\modules\rope.cppm">
+      <Filter>modules</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\modules\types.cppm">
+      <Filter>modules</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\dev\atma2\projects\atma\modules\vector.cppm">
+      <Filter>modules</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\algorithm.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\arena_allocator.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\assert.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\atomic.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\benchmark.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\bitmask.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\com_ptr.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\config\platform.hpp">
+      <Filter>include\config</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\console.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\delegate.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\ebo_pair.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\event.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\flyweight.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\function.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\function_composition.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\functor.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\handle_table.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\hash.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\hash_map.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\lockfree\queue.hpp">
+      <Filter>include\lockfree</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\lockfree_list.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\lockfree_queue.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\logging.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\math\aabb.hpp">
+      <Filter>include\math</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\math\aabc.hpp">
+      <Filter>include\math</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\math\constants.hpp">
+      <Filter>include\math</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\math\functions.hpp">
+      <Filter>include\math</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\math\intersection.hpp">
+      <Filter>include\math</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\math\matrix4f.hpp">
+      <Filter>include\math</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\math\scalar.hpp">
+      <Filter>include\math</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\math\triangle.hpp">
+      <Filter>include\math</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\math\vector4f.hpp">
+      <Filter>include\math</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\math\vector4i.hpp">
+      <Filter>include\math</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\platform\allocation.hpp">
+      <Filter>include\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\platform\interop.hpp">
+      <Filter>include\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\preprocessor.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\ranges\core.hpp">
+      <Filter>include\ranges</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\ranges\filter.hpp">
+      <Filter>include\ranges</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\ranges\iota.hpp">
+      <Filter>include\ranges</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\ranges\map.hpp">
+      <Filter>include\ranges</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\ranges\zip.hpp">
+      <Filter>include\ranges</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\rope.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\shared_memory.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\streams.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\string.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\thread\engine.hpp">
+      <Filter>include\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\threading.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\tuple.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\unit_test.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\utf\algorithm.hpp">
+      <Filter>include\utf</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\dev\atma2\projects\atma\include\atma\utf\utf8_string.hpp">
+      <Filter>include\utf</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\dev\atma2\projects\atma\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{00684D31-EC78-38D2-9ADC-9AEDB3B8D6C9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\config">
+      <UniqueIdentifier>{5488682C-6AA6-3042-9665-B11596DB3DCC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\lockfree">
+      <UniqueIdentifier>{0E3CB810-D101-399C-A8D2-FEF72AFDE91E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\math">
+      <UniqueIdentifier>{657D8033-8DD6-35A6-B55A-575813CB5002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\platform">
+      <UniqueIdentifier>{AB46BAA2-70FB-3D10-935F-80CA06913638}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\ranges">
+      <UniqueIdentifier>{68019B13-EE92-3250-A29B-D308DD51C72F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\thread">
+      <UniqueIdentifier>{894FEAA1-D251-323B-9303-9094574839A7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\utf">
+      <UniqueIdentifier>{140AD817-3702-351D-BC84-D95D9909DA0F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="modules">
+      <UniqueIdentifier>{FE6ED81C-1BB1-36C0-BC3C-167CAFD84862}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{09E96B0E-47D2-3D37-BC11-290D5E18C99D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\atma_test">
+      <UniqueIdentifier>{EE046C36-84AB-3776-AB1A-41AA8C41EE16}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
