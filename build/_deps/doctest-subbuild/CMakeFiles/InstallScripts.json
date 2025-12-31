@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"D:/dev/materia/build/_deps/doctest-subbuild/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

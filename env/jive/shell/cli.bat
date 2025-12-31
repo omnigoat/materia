@@ -10,10 +10,10 @@ set 'PATH=\"%PATH%;%REPO_BASE_DIR%env\cli\internal\"'
 call dotnet restore >NUL 2>&1
 
 :: build mantle
-call dotnet build --configuration Release %REPO_BASE_DIR%env\mantle\project\Mantle.sln
+call dotnet build --configuration Release %REPO_BASE_DIR%env\mantle\mantle.sln
 
 :: run our cli
-call %REPO_BASE_DIR%env\mantle\project\build\Release\net9.0\Mantle.exe
+call %REPO_BASE_DIR%env\mantle\build\Release\net9.0\mantle.exe
 
 goto :eof
 

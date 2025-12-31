@@ -407,7 +407,7 @@ namespace atma::unit_test
 				separator_to_stream();
 				s << "\n";
 
-				file_line_to_stream(s, tc->m_file, tc->m_line, "\n");
+				file_line_to_stream(tc->m_file.c_str(), tc->m_line, "\n");
 				if (tc->m_description)
 					s << Color::Yellow << "DESCRIPTION: " << Color::None << tc->m_description << "\n";
 				if (tc->m_test_suite && tc->m_test_suite[0] != '\0')
@@ -425,7 +425,7 @@ namespace atma::unit_test
 				hasLoggedCurrentTestStart = true;
 			}
 
-			file_line_to_stream(s, rb.m_file, rb.m_line, " ");
+			file_line_to_stream(rb.m_file, rb.m_line, " ");
 			successOrFailColoredStringToStream(!rb.m_failed, rb.m_at);
 			if ((rb.m_at & (assertType::is_throws_as | assertType::is_throws_with)) ==
 				0) //!OCLINT bitwise operator in conditional
@@ -747,7 +747,16 @@ namespace atma { namespace unit_test {
 }}
 
 
+//
+// add some additional "doctest" macros
+//
+#define DOCTEST_SCENARIO_OF(suite_name, name) DOCTEST_TEST_CASE("  Scenario: " name * ::doctest::test_suite(suite_name))
+#define DOCTEST_AND_GIVEN(name) DOCTEST_SUBCASE("And Given: " name)
 
+#if !defined(DOCTEST_CONFIG_NO_SHORT_MACRO_NAMES)
+#define SCENARIO_OF DOCTEST_SCENARIO_OF
+#define AND_GIVEN DOCTEST_AND_GIVEN
+#endif
 
 
 #define CHECK_CANARY_SCOPE(name, ...) \

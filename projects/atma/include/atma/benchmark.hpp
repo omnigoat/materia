@@ -33,7 +33,7 @@ import atma.meta;
 	void scenario::execute()
 
 #define ATMA_BENCH_SCENARIO(name, ...) \
-	ATMA_BENCH_SCENARIO_ii(ATMA_PP_CAT(name, __LINE__), #name, __VA_ARGS__)
+	ATMA_BENCH_SCENARIO_ii(ATMA_PP_CAT(name, __LINE__), #name __VA_OPT__(,) __VA_ARGS__)
 
 #define ATMA_BENCHMARK_ii(name, file, line, benchmark) \
 	if (auto benchmark = this->register_benchmark(name, file, line, (uintptr_t)_ReturnAddress())) \

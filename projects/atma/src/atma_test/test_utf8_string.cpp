@@ -24,7 +24,7 @@ SCENARIO_TEMPLATE("utf8_span_t is used by user", span_type, atma::utf8_span_t, a
 		atma::utf8_string_t test{"hello good sir"};
 
 		GIVEN("an originating span constructed around the range 'hello good sir'")
-		AND_GIVEN("a span copy-constructed from our originating span")
+		GIVEN("a span copy-constructed from our originating span")
 		{
 			span_type span1{test};
 			span_type span2{span1};
@@ -49,7 +49,7 @@ SCENARIO_TEMPLATE("utf8_span_t is used by user", span_type, atma::utf8_span_t, a
 		(void)std::ranges::end(test);
 
 		GIVEN("a utf8_string_t of 'hello good sir'")
-		AND_GIVEN("a utf8_span directly-constructed from said string")
+		GIVEN("a utf8_span directly-constructed from said string")
 		{
 			span_type span{test};
 
@@ -62,7 +62,7 @@ SCENARIO_TEMPLATE("utf8_span_t is used by user", span_type, atma::utf8_span_t, a
 	}
 }
 
-SCENARIO_OF("utf8_string_t", "utf8-strings can be constructed")
+SCENARIO("utf8_string_t - utf8-strings can be constructed")
 {
 	GIVEN("a default-constructed string")
 	{

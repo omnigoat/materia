@@ -1,3 +1,0 @@
-D:/dev/atma2/build/project/_deps/doctest-subbuild/CMakeFiles/doctest-populate.dir
-D:/dev/atma2/build/project/_deps/doctest-subbuild/CMakeFiles/ALL_BUILD.dir
-D:/dev/atma2/build/project/_deps/doctest-subbuild/CMakeFiles/ZERO_CHECK.dir

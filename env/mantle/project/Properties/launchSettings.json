@@ -1,0 +1,16 @@
+{
+	"profiles": {
+		"set-default": {
+			"commandName": "Project",
+			"commandLineArgs": "set-default JIVE_idegen_config hooray"
+		},
+		"mantle": {
+			"commandName": "Project",
+			"commandLineArgs": "idegen atma win64 debug"
+		},
+		"ide-gen": {
+			"commandName": "Project",
+			"commandLineArgs": "idegen atma win64 debug"
+		}
+	}
+}

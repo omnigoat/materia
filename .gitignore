@@ -3,6 +3,7 @@
 Debug/
 Release/
 x64/
+build/
 
 # ignore obj folder for CS projects
 project/AtmaCS/obj/
@@ -12,3 +13,4 @@ project/AtmaCS/obj/
 *.sdf
 *.user
 *.lib
+*.pdb

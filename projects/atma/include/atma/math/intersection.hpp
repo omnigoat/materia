@@ -41,7 +41,7 @@ namespace atma { namespace math {
 		, d1(dot_product(n, c - v0))
 		, d2(dot_product(n, dp - c - v0))
 	{
-		// zx-plane
+		// xy-plane
 		auto xym = (n.z < 0.f ? -1.f : 1.f);
 		ne0xy = vector4f{-e0.y, e0.x, 0.f, 0.f} * xym;
 		ne1xy = vector4f{-e1.y, e1.x, 0.f, 0.f} * xym;
