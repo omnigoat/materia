@@ -17,12 +17,16 @@ import atma.meta;
 
 
 
-#define ATMA_BENCH_INTERNAL_TEMPLATE_ARGS_M(r, data, i, elem) BOOST_PP_COMMA_IF(i) typename BOOST_PP_CAT(Param, BOOST_PP_INC(i))
+#define ATMA_BENCH_INTERNAL_TEMPLATE_ARGS_M(r, data, i, elem) BOOST_PP_COMMA_IF(i) typename BOOST_PP_TUPLE_ELEM(1, elem)
 #define ATMA_BENCH_SCENARIO_m(...) \
 	BOOST_PP_SEQ_FOR_EACH_I(ATMA_BENCH_INTERNAL_TEMPLATE_ARGS_M, ~, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__))
 
+#define ATMA_BENCH_INTERNAL_TEMPLATE_ARGS_S(r, data, i, elem) BOOST_PP_COMMA_IF(i) BOOST_PP_TUPLE_ELEM(0, elem)
+#define ATMA_BENCH_SCENARIO_s(...) \
+	BOOST_PP_SEQ_FOR_EACH_I(ATMA_BENCH_INTERNAL_TEMPLATE_ARGS_S, ~, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__))
+
 #define ATMA_BENCH_SCENARIO_ii(scenario, scenario_name, ...) \
-	struct scenario : ::atma::bench::base_scenario<scenario __VA_OPT__(,) __VA_ARGS__> \
+	struct scenario : ::atma::bench::base_scenario<scenario __VA_OPT__(,) ATMA_BENCH_SCENARIO_s(__VA_ARGS__)> \
 	{ \
 		static constexpr char const* name = scenario_name; \
 		template <typename __VA_OPT__(, ATMA_BENCH_SCENARIO_m(__VA_ARGS__))> \

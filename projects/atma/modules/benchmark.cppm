@@ -20,7 +20,6 @@ module;
 #include <profileapi.h>
 
 #include <atma/assert.hpp>
-#include <atma/benchmark.hpp>
 #include <atma/ranges/zip.hpp>
 
 export module atma.benchmark;
@@ -835,16 +834,16 @@ namespace atma::bench
 		static inline const auto default_value = Value{};
 	};
 
+	template <string_literal name, typename Key, typename Value>
+	struct key_value_param
+		: param<name, key_value_param_payload<Key, Value>>
+	{ };
+
 	template <typename Type>
 	struct type_param_payload
 	{
 		using type = Type;
 	};
-
-	template <string_literal name, typename Key, typename Value>
-	struct key_value_param
-		: param<name, key_value_param_payload<Key, Value>>
-	{ };
 
 	template <string_literal name, typename T>
 	struct type_param
@@ -877,40 +876,7 @@ namespace atma::bench
 
 
 
-
-
-
-using hash_map_kv_pairs = atma::bench::axis<"types",
-	atma::bench::key_value_param<"u64|u64", uint64_t, uint64_t>,
-	atma::bench::key_value_param<"u64|string", uint64_t, std::string>
->;
-
-
-struct hash_map_adaptor_1
-{
-	template <typename K, typename V>
-	using type = std::map<K, V>;
-};
-
-struct hash_map_adaptor_2
-{
-	template <typename K, typename V>
-	using type = std::unordered_map<K, V>;
-};
-
-using hash_map_adaptors = atma::bench::axis<"implementation",
-	atma::bench::param<"std::map", hash_map_adaptor_1>,
-	atma::bench::param<"std::unordered_map", hash_map_adaptor_2>>;
-
-template <typename Adapter, typename KVPair>
-using hash_map_maker_t = typename Adapter::template type<
-	typename KVPair::key_type,
-	typename KVPair::value_type>;
-
-
-using silliness_axis = atma::bench::axis<"silliness",
-	atma::bench::type_param<"tomfoolery", int>,
-	atma::bench::type_param<"shenanigans", float>>;
+#if 0
 
 ATMA_BENCH_SCENARIO(numbers)
 {
@@ -926,15 +892,34 @@ ATMA_BENCH_SCENARIO(numbers)
 		atma::bench::doNotOptimizeAway(d);
 	}
 }
+#endif
 
+template <template <typename...> typename HashMapType>
+struct hash_map_payload
+{
+	template <typename KV>
+	using type = HashMapType<typename KV::key_type, typename KV::value_type>;
+};
+
+using hash_maps_axis = atma::bench::axis<"hash_map",
+	atma::bench::param<"std::map", hash_map_payload<std::map>>,
+	atma::bench::param<"std::unordered_map", hash_map_payload<std::unordered_map>>>;
+
+using types_axis = atma::bench::axis<"types",
+	atma::bench::key_value_param<"u64|u64", uint64_t, uint64_t>,
+	atma::bench::key_value_param<"u64|string", uint64_t, std::string>>;
+
+using silliness_axis = atma::bench::axis<"silliness",
+	atma::bench::type_param<"tomfoolery", int>,
+	atma::bench::type_param<"shenanigans", float>>;
 
 #if 1
-ATMA_BENCH_SCENARIO(hash_map, hash_map_adaptors, hash_map_kv_pairs, silliness_axis)
+ATMA_BENCH_SCENARIO(hash_map_thing, (hash_maps_axis, HashMap), (types_axis, Types), (silliness_axis, silliness))
 {
-	using hash_map_type = hash_map_maker_t<Param1, Param2>;
+	using hash_map_type = typename HashMap::template type<Types>;
 
-	auto default_key = Param2::default_key;
-	auto const default_value = Param2::default_value;
+	auto default_key = Types::default_key;
+	auto const default_value = Types::default_value;
 
 	ATMA_BENCHMARK("insert")
 	{
