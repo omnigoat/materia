@@ -1320,7 +1320,7 @@ namespace atma
 	template <utf8_charseq_range_concept<char const> Range, typename Predicate>
 	inline auto find_if(Range const& range, Predicate&& pred)
 	{
-		return find_if(std::begin(range), std::end(range), std::forward<Predicate>(pred));
+		return atma::find_if(std::begin(range), std::end(range), std::forward<Predicate>(pred));
 	}
 
 	template <utf8_charseq_iterator_concept Iterator, utf8_char_fn_concept Predicate>
@@ -1355,7 +1355,7 @@ namespace atma
 	{
 		ATMA_ASSERT(delims);
 
-		return find_if(begin, end, [delims](utf8_char_t lhs) {
+		return atma::find_if(begin, end, [delims](utf8_char_t lhs) {
 			return utf8_charseq_any_of(delims, [lhs](char const* delim) {
 				return lhs == delim; }); });
 	}

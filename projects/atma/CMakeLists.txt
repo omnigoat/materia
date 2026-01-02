@@ -1,19 +1,19 @@
 cmake_minimum_required(VERSION 3.31)
-set(CMAKE_CXX_STANDARD 20)
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 add_library(atma STATIC)
 
-target_compile_options(atma PRIVATE
-	/Zc:preprocessor)
+# compile options
+target_compile_options(atma PUBLIC ${MATERIA_CPP_FLAGS})
+
+# dependencies
+target_link_libraries(atma
+	PUBLIC doctest boost)
 
 # includes
 target_include_directories(atma PUBLIC include)
 
 target_sources(atma 
-	PUBLIC FILE_SET headers
-	TYPE HEADERS
+	PUBLIC FILE_SET HEADERS
 	BASE_DIRS include/atma FILES
 		include/atma/config/platform.hpp
 		include/atma/math/aabb.hpp
@@ -99,13 +99,6 @@ target_sources(atma PUBLIC
 		modules/vector.cppm)
 
 
-#source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include/atma PREFIX "include" FILES ${headers})
-#source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${source_set} ${modules})
-
-target_link_libraries(atma PUBLIC doctest)
-target_link_libraries(atma PUBLIC boost)
-
-
 
 #
 # atma_test
@@ -126,8 +119,5 @@ target_sources(atma_test PRIVATE
 	src/atma_test/test_rope.cpp
 	src/atma_test/test_utf8_string.cpp
 	src/atma_test/test_vector.cpp)
-
-target_compile_options(atma_test PRIVATE
-	/Zc:preprocessor)
 
 target_link_libraries(atma_test PUBLIC atma)

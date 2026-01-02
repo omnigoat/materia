@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.31)
 
 set(CMAKE_CXX_STANDARD 20)
-#set(CMAKE_GENERATOR Ninja)
 
 project(materia)
+
+set(MATERIA_CPP_FLAGS
+	$<$<CXX_COMPILER_ID:MSVC>:/Zc:preprocessor>)
 
 add_subdirectory(projects/doctest doctest)
 add_subdirectory(projects/boost boost)

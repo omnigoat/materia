@@ -145,7 +145,7 @@ auto runtime_t::register_directory_watch(
 		auto& info = dir_infos_.emplace_back();
 		info.path = path;
 		info.notify = notify;
-		HANDLE dir = CreateFile(wpath,
+		HANDLE dir = CreateFileW(wpath,
 			FILE_LIST_DIRECTORY, FILE_SHARE_READ,
 			NULL, OPEN_EXISTING,
 			FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
