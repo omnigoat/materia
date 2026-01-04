@@ -92,6 +92,16 @@ export namespace atma::meta
 }
 
 
+// constant? name?
+export namespace atma::meta::lazy
+{
+	template <typename C>
+	struct constant
+	{
+		template <typename...>
+		using f = C;
+	};
+}
 
 
 // typeval

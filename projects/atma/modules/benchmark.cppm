@@ -24,6 +24,7 @@ module;
 
 export module atma.benchmark;
 
+import atma.types;
 
 export namespace atma::bench
 {
@@ -38,6 +39,125 @@ export namespace atma::bench
 		char data[N];
 	};
 }
+
+
+namespace atma::bench
+{
+	template <typename P, typename = std::void_t<>>
+	struct param_transformer
+	{
+		using type = P;
+	};
+
+	template <typename P>
+	struct param_transformer<P, std::void_t<typename P::transform_type>>
+	{
+		using type = typename P::transform_type;
+	};
+
+	template <typename P>
+	using param_transformer_t = typename param_transformer<P>::type;
+
+
+	using identity_xform = meta::lazy::identity;
+
+	template <typename T>
+	using set_xform = meta::lazy::constant<T>;
+
+
+	//
+	// param
+	//
+	template <string_literal name, typename xform, typename... payload>
+	struct param_t
+	{
+		constexpr static inline auto name = name.data;
+
+		// the type given to the benchmark
+		using type = meta::lazy::invoke<xform, payload...>;
+	};
+
+	template <string_literal name, typename xform, typename... payloads>
+	using param = param_t<name, xform, payloads...>;
+
+
+	// type-param
+	template <string_literal name, typename T>
+	using type_param = param<name, identity_xform, T>;
+
+	// templated-param
+	template <string_literal name, template <typename...> typename type>
+	using templated_param = param<name, identity_xform, meta::lazy::cfe<type>>;
+
+	template <typename f, typename... args>
+	using construct_templated_type = meta::lazy::invoke<f, args...>;
+
+
+	template <typename Key, typename Value>
+	struct key_value_payload
+	{
+		using key_type = Key;
+		using value_type = Value;
+
+		static inline const auto default_key = Key{};
+		static inline const auto default_value = Value{};
+	};
+
+	template <string_literal name, typename Key, typename Value>
+	using key_value_param = param<name, meta::lazy::identity, key_value_payload<Key, Value>>;
+}
+
+
+///
+/// axis
+/// -------
+/// 
+///
+namespace atma::bench
+{
+	template <typename T>
+	constexpr string_literal type_name_lookup_v = "<unknown-type>";
+
+	template <>
+	constexpr string_literal type_name_lookup_v<int> = "int";
+}
+
+
+///
+/// axis
+/// -------
+/// 
+///
+namespace atma::bench
+{
+	template <string_literal Name, typename... Params>
+	struct axis
+	{
+		using params_type = atma::meta::list<Params...>;
+
+		static constexpr auto name = Name.data;
+		static constexpr auto params = atma::meta::list<Params...>{};
+	};
+
+	template <string_literal name, typename... types>
+	using types_axis = axis<name, type_param<type_name_lookup_v<types>, types>...>;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 namespace atma::bench
@@ -176,14 +296,6 @@ export namespace atma::bench
 		return r;
 	}
 
-	template <string_literal Name, typename... Params>
-	struct axis
-	{
-		using params_type = atma::meta::list<Params...>;
-
-		static constexpr auto name = Name.data;
-		static constexpr auto params = atma::meta::list<Params...>{};
-	};
 
 	template <typename... Axis>
 	void measure_along() {}
@@ -565,8 +677,7 @@ namespace atma::bench
 //
 namespace atma::bench
 {
-	
-	__forceinline executing_benchmark_t::executing_benchmark_t(benchmark_t* bm)
+	inline executing_benchmark_t::executing_benchmark_t(benchmark_t* bm)
 		: benchmark_{bm}
 		, clock_resolution_{detail::get_resolution()}
 		, target_epoch_duration_{benchmark_->clock_multiplier * clock_resolution_}
@@ -578,7 +689,7 @@ namespace atma::bench
 			target_epoch_duration_ = benchmark_->max_epoch_duration;
 	}
 
-	__forceinline executing_benchmark_t::~executing_benchmark_t()
+	inline executing_benchmark_t::~executing_benchmark_t()
 	{
 		benchmark_->time += total_elapsed_;
 		benchmark_->iterations += total_iterations_;
@@ -605,19 +716,17 @@ namespace atma::bench
 		return static_cast<size_t>(dremaining_iters * 1.2 + 0.5);
 	}
 
-	__forceinline void executing_benchmark_t::update(std::chrono::nanoseconds elapsed)
+	inline void executing_benchmark_t::update(std::chrono::nanoseconds elapsed)
 	{
 		if (elapsed == std::chrono::nanoseconds::zero())
 			elapsed = clock_resolution_;
 
 		if (state_ == state_t::spinning_up)
 		{
-			// two-thirds or more of the way to the target epoch duration
-			bool const close_enough = elapsed * 3 >= target_epoch_duration_ * 2;
-
-			// yeah goood enough - consider this a valid epoch and add it
-			// to our measurements - but still reevaluate the number of iterations
-			if (close_enough)
+			// two-thirds or more of the way to the target epoch duration is
+			// goood enough - consider this a valid epoch and add it to our
+			// measurements, but still recalculate the number of iterations
+			if (elapsed * 3 >= target_epoch_duration_ * 2)
 			{
 				state_ = state_t::measuring;
 				total_iterations_ += epoch_iters_;
@@ -628,10 +737,12 @@ namespace atma::bench
 			// we're very far away from the target duration, x10 the iterations
 			else if (elapsed * 10 < target_epoch_duration_)
 			{
+				// watch out for overflow
 				epoch_iters_ = (epoch_iters_ * 10 > epoch_iters_)
-					? estimate_best_iter_count(elapsed, epoch_iters_)
+					? epoch_iters_ *= 10
 					: 0;
 			}
+			// neither very far away nor close enough - just recalculate
 			else
 			{
 				epoch_iters_ = estimate_best_iter_count(elapsed, epoch_iters_);
@@ -749,7 +860,7 @@ namespace atma::bench
 			do
 			{
 				executed_benchmark_this_run_ = false;
-				static_cast<S*>(this)->template execute<void, axis...>();
+				static_cast<S*>(this)->template execute<void, typename param_transformer_t<axis>::type...>();
 			} while (executed_benchmark_this_run_);
 		}
 
@@ -816,43 +927,6 @@ namespace atma::bench
 
 
 
-namespace atma::bench
-{
-	template <string_literal name, typename payload>
-	struct param : payload
-	{
-		constexpr static inline auto name = name.data;
-	};
-
-	template <typename Key, typename Value>
-	struct key_value_param_payload
-	{
-		using key_type = Key;
-		using value_type = Value;
-
-		static inline const auto default_key = Key{};
-		static inline const auto default_value = Value{};
-	};
-
-	template <string_literal name, typename Key, typename Value>
-	struct key_value_param
-		: param<name, key_value_param_payload<Key, Value>>
-	{ };
-
-	template <typename Type>
-	struct type_param_payload
-	{
-		using type = Type;
-	};
-
-	template <string_literal name, typename T>
-	struct type_param
-		: param<name, type_param_payload<T>>
-	{ };
-}
-
-
-
 
 
 
@@ -894,16 +968,20 @@ ATMA_BENCH_SCENARIO(numbers)
 }
 #endif
 
-template <template <typename...> typename HashMapType>
-struct hash_map_payload
-{
-	template <typename KV>
-	using type = HashMapType<typename KV::key_type, typename KV::value_type>;
-};
 
-using hash_maps_axis = atma::bench::axis<"hash_map",
-	atma::bench::param<"std::map", hash_map_payload<std::map>>,
-	atma::bench::param<"std::unordered_map", hash_map_payload<std::unordered_map>>>;
+#if 1
+using hash_map_axis = atma::bench::axis<"hash_map",
+	atma::bench::templated_param<"std::map", std::map>,
+	atma::bench::templated_param<"std::unordered_map", std::unordered_map>>;
+#else
+//using hash_maps_construction = atma::bench::construct_from<atma::bench::axis_args::_2>;
+
+using hash_map_axis = atma::bench::constructed_axis<"hash_map",
+	//hash_maps_construction,
+	atma::bench::param_construction_via<atma::bench::axis2>,
+	atma::bench::templated_param<"std::map", std::map>,
+	atma::bench::templated_param<"std::unordered_map", std::unordered_map>>;
+#endif
 
 using types_axis = atma::bench::axis<"types",
 	atma::bench::key_value_param<"u64|u64", uint64_t, uint64_t>,
@@ -913,13 +991,24 @@ using silliness_axis = atma::bench::axis<"silliness",
 	atma::bench::type_param<"tomfoolery", int>,
 	atma::bench::type_param<"shenanigans", float>>;
 
-#if 1
-ATMA_BENCH_SCENARIO(hash_map_thing, (hash_maps_axis, HashMap), (types_axis, Types), (silliness_axis, silliness))
-{
-	using hash_map_type = typename HashMap::template type<Types>;
+using simple_types_axis = atma::bench::types_axis<"silliness", int, float, char, std::string>;
 
-	auto default_key = Types::default_key;
-	auto const default_value = Types::default_value;
+template <typename HM, typename Types>
+using make_hash_map_t = atma::meta::lazy::invoke<HM, Types>;
+
+ATMA_BENCH_SCENARIO(hash_map_thing, hash_map_axis, types_axis, silliness_axis)
+{
+	//using hash_map_type = make_hash_map_t<hash_maps_axis_type, types_axis_type>;
+	//using hash_map_type = atma::bench::construct_templated_type<
+	//	hash_maps_axis_type,
+	//	atma::bench::splat_tuple<types_axis_type>>;
+	using hash_map_type = atma::bench::construct_templated_type<
+		hash_map_axis_type,
+		typename types_axis_type::key_type,
+		typename types_axis_type::value_type>;
+
+	auto default_key = types_axis_type::default_key;
+	auto const default_value = types_axis_type::default_value;
 
 	ATMA_BENCHMARK("insert")
 	{
@@ -947,7 +1036,12 @@ ATMA_BENCH_SCENARIO(hash_map_thing, (hash_maps_axis, HashMap), (types_axis, Type
 		ATMA_ASSERT(hash_map.empty());
 	}
 }
-#endif
+
+ATMA_BENCHMARK_SIMPLE(addition, silliness_axis)
+{
+	silliness_axis_type i{};
+	i += 4;
+}
 
 
 
@@ -1035,7 +1129,7 @@ ATMA_BENCH_SCENARIO(hash_map_thing, (hash_maps_axis, HashMap), (types_axis, Type
 
 using NTSTATUS = long;
 
-import atma.types;
+
 
 
 
