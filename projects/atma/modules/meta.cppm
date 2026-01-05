@@ -318,7 +318,7 @@ export namespace atma::meta::lazy
 
 
 // invoke
-export namespace atma::meta::lazy
+export namespace atma::meta
 {
 	template <typename F, typename... Args>
 	using invoke = typename F::template f<Args...>;
@@ -385,14 +385,14 @@ namespace atma::meta::lazy::detail
 
 export namespace atma::meta::lazy
 {
-	template <typename C>
+	template <typename C = listify>
 	struct unpack_front
 	{
 		template <typename List, typename... Args>
 		using f = typename detail::unpack_impl<true, C, List, Args...>::f;
 	};
 
-	template <typename C>
+	template <typename C = listify>
 	struct unpack_back
 	{
 		template <typename List, typename... Args>
@@ -400,9 +400,10 @@ export namespace atma::meta::lazy
 	};
 
 	// order doesn't matter, pick one
-	template <typename C>
+	template <typename C = listify>
 	using unpack = unpack_back<C>;
 }
+
 
 
 //
@@ -465,9 +466,38 @@ export namespace atma::meta
 	using at = lazy::cc<lazy::unpack<lazy::at<usize_<N>>>, List>;
 }
 
+///
+/// at2
+/// ----
+/// 
+/// gets the argument at index N, which is provided during invocation
+///
+export namespace atma::meta::lazy
+{
+	template <typename C = identity>
+	struct at2
+	{
+		template <typename N, typename... Elements>
+		using f = cc<detail::_at_<N::value, C>, Elements...>;
+	};
+}
 
+///
+/// list_push_back
+/// 
+export namespace atma::meta::lazy
+{
+	template <typename C = listify>
+	struct list_push_back
+		: unpack_back<C>
+	{};
+}
 
-
+export namespace atma::meta
+{
+	template <typename list, typename x>
+	using list_push_back = invoke<lazy::unpack_back<>, list, x>;
+}
 
 
 
@@ -687,7 +717,7 @@ namespace atma::meta::detail
 	struct _foldl_selector_<2>
 	{ // initial value (list expanded at back)
 		template <typename F, typename Init, typename List>
-		using f = lazy::unpack_back<lazy::foldl<F>>::template f<List, Init>;
+		using f = typename lazy::unpack_back<lazy::foldl<F>>::template f<List, Init>;
 	};
 }
 
@@ -802,6 +832,54 @@ export namespace atma::meta
 }
 
 
+
+
+///
+/// list-join
+/// ------------
+/// 
+namespace atma::meta::lazy::detail
+{
+	template <typename lhs, typename rhs>
+	struct _list_join_impl2_;
+
+	template <typename... lhs, typename rhs>
+	struct _list_join_impl2_<list<lhs...>, rhs>
+	{
+		using type = list<lhs..., rhs>;
+	};
+
+	template <typename... lhs, typename... rhs>
+	struct _list_join_impl2_<list<lhs...>, list<rhs...>>
+	{
+		using type = list<lhs..., rhs...>;
+	};
+
+	struct _list_join_impl_
+	{
+		template <typename lhs, typename rhs>
+		using f = typename _list_join_impl2_<lhs, rhs>::type;
+	};
+}
+
+export namespace atma::meta::lazy
+{
+	template <typename C = listify>
+	struct list_join
+	{
+		template <typename... lists>
+		using f = invoke<
+			foldl<detail::_list_join_impl_>,
+			list<>,
+			lists...>;
+	};
+}
+
+
+
+
+
+
 // all/any
 export namespace atma::meta
 {
@@ -856,8 +934,6 @@ export namespace atma::meta::lazy
 	template <typename F, typename C = listify>
 	struct map
 	{
-		struct splat {};
-
 		template <typename... Ts>
 		using f = typename C::template f<typename F::template f<Ts>...>;
 
@@ -871,6 +947,47 @@ export namespace atma::meta
 	template <template <typename> typename F, typename List>
 	using map = typename lazy::unpack<lazy::map<lazy::cfe<F>>>::template f<List>;
 }
+
+///
+/// zip
+/// ------
+///
+export namespace atma::meta::lazy
+{
+	namespace detail
+	{
+		template <typename... lhs_args, typename... rhs_args>
+		auto zip_result(list<lhs_args...>, list<rhs_args...>) -> list<list<lhs_args, rhs_args>...>;
+	}
+
+	template <typename C = identity>
+	struct zip
+	{
+		template <typename listA, typename listB>
+		using f = typename C::template f<decltype(detail::zip_result(listA{}, listB{}))>;
+	};
+
+	template <>
+	struct zip<identity>
+	{
+		template <typename listA, typename listB>
+		using f = decltype(detail::zip_result(listA{}, listB{}));
+	};
+}
+
+export namespace atma::meta
+{
+	template <typename ListA, typename ListB>
+	using zip = invoke<lazy::zip<>, ListA, ListB>;
+}
+
+
+
+
+
+
+
+
 
 //
 // permutations lazy-stylez
@@ -1294,7 +1411,7 @@ export void test_mythings()
 
 	//static_assert(std::is_same_v<
 	//	list<bool_<true>, bool_<true>, bool_<true>, bool_<false>>,
-	//	typename lazy::invoke<lazy::map<make_unsigned, size_is_32bit_or_less<>>, int, short, long, long long>
+	//	typename invoke<lazy::map<make_unsigned, size_is_32bit_or_less<>>, int, short, long, long long>
 	//>);
 	using a_list  = list<int, char, float>;
 
@@ -1345,7 +1462,7 @@ export void test_mythings()
 		foldr_pack<oper_action_t, oper<sub, uint_<40>>, oper<div, uint_<21>>, uint_<3>>
 	>);
 
-	static_assert(std::is_same_v<lazy::invoke<lazy::map<make_unsigned>, int, short, long>, list<unsigned int, unsigned short, unsigned long>>);
+	static_assert(std::is_same_v<invoke<lazy::map<make_unsigned>, int, short, long>, list<unsigned int, unsigned short, unsigned long>>);
 
 	//static_assert(lazy::cc<lazy::if_<size_is_32bit_or_less<>,
 	//	lazy::identity,

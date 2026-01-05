@@ -41,7 +41,7 @@ import atma.meta;
 	void scenario::execute()
 
 #define ATMA_BENCH_SCENARIO(name, ...) \
-	ATMA_BENCH_SCENARIO_ii(ATMA_PP_CAT(name, __LINE__), #name __VA_OPT__(, __VA_ARGS__))
+	ATMA_BENCH_SCENARIO_ii(ATMA_PP_CAT(_atma_bench_scenario_, __LINE__), name __VA_OPT__(, __VA_ARGS__))
 
 #define ATMA_BENCHMARK_ii(name, file, line, benchmark) \
 	if (auto benchmark = this->register_benchmark(name, file, line, (uintptr_t)_ReturnAddress())) \
@@ -57,10 +57,10 @@ import atma.meta;
 #define ATMA_BENCHMARK_SIMPLE(name, ...) \
 	ATMA_BENCH_SCENARIO(name, __VA_ARGS__) \
 	{ \
-		ATMA_BENCHMARK_ii(#name, __FILE__, __LINE__, ATMA_PP_CAT(abmi, __LINE__)) \
+		ATMA_BENCHMARK_ii(name, __FILE__, __LINE__, ATMA_PP_CAT(abmi, __LINE__)) \
 		{ \
 			this->execute_simple __VA_OPT__(<ATMA_BENCH_SCENARIO_a(__VA_ARGS__)>)(); \
 		} \
 	} \
 	__VA_OPT__(template <ATMA_BENCH_SCENARIO_ta(__VA_ARGS__)>) \
-	void ATMA_PP_CAT(name, __LINE__)::execute_simple()
+	void ATMA_PP_CAT(_atma_bench_scenario_, __LINE__)::execute_simple()
