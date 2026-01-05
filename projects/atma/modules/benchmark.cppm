@@ -1099,9 +1099,7 @@ namespace atma::bench
 
 
 
-#if 0
-
-ATMA_BENCH_SCENARIO(numbers)
+ATMA_BENCH_SCENARIO("numbers")
 {
 	double d = 1.0;
 
@@ -1115,100 +1113,143 @@ ATMA_BENCH_SCENARIO(numbers)
 		atma::bench::doNotOptimizeAway(d);
 	}
 }
+
+
+namespace test_simple_axis
+{
+	using silliness_axis = atma::bench::axis<"silliness",
+		atma::bench::type_param<"shenanigans", int>,
+		atma::bench::type_param<"tomfoolery", float>>;
+
+	ATMA_BENCHMARK_SIMPLE("addition", silliness_axis)
+	{
+		silliness_axis_type i{};
+		i += 4;
+	}
+}
+
+//
+#if 1
+namespace test_templated_axis
+{
+	using hash_map_axis = atma::bench::axis<"hash_map",
+		atma::bench::templated_param<"std::map", std::map>,
+		atma::bench::templated_param<"std::unordered_map", std::unordered_map>>;
+
+	using key_types_axis = atma::bench::axis<"key-types",
+		atma::bench::type_param<"u64", uint64_t>,
+		atma::bench::type_param<"f32", float>>;
+
+	using value_types_axis = atma::bench::axis<"value-types",
+		atma::bench::type_param<"u64", uint64_t>,
+		atma::bench::type_param<"f32", float>>;
+
+	ATMA_BENCH_SCENARIO("hash-maps", hash_map_axis, key_types_axis, value_types_axis)
+	{
+		using hash_map_type = atma::bench::construct_templated_type<
+			hash_map_axis_type,
+			key_types_axis_type,
+			value_types_axis_type>;
+
+		auto const default_key = key_types_axis_type{};
+		auto const default_value = value_types_axis_type{};
+
+		ATMA_BENCHMARK("clear")
+		{
+			hash_map_type hash_map;
+
+			hash_map[default_key] = default_value;
+			ATMA_BENCH_SUBMEASURE()
+			{
+				hash_map.clear();
+			}
+		}
+	}
+}
 #endif
 
-#define USE_SIMPLE_HASH_MAP 0
-#if USE_SIMPLE_HASH_MAP
-using hash_map_axis = atma::bench::axis<"hash_map",
-	atma::bench::templated_param<"std::map", std::map>,
-	atma::bench::templated_param<"std::unordered_map", std::unordered_map>>;
-#else
-using hash_map_axis = atma::bench::constructed_axis<"hash_map",
-	atma::bench::construct_with_axes<atma::bench::axis2_splat>,
-	atma::bench::templated_param<"std::map", std::map>,
-	atma::bench::templated_param<"std::unordered_map", std::unordered_map>>;
+
+
+//using hash_map_axis = atma::bench::axis<"hash_map",
+//	atma::bench::templated_param<"std::map", std::map>,
+//	atma::bench::templated_param<"std::unordered_map", std::unordered_map>>;
+#if 1
+namespace test_dynamic_templated_construction
+{
+	using hash_map_axis = atma::bench::constructed_axis<"hash_map",
+		atma::bench::construct_with_axes<atma::bench::axis2, atma::bench::axis3>,
+		atma::bench::templated_param<"std::map", std::map>,
+		atma::bench::templated_param<"std::unordered_map", std::unordered_map>>;
+
+	using key_types_axis = atma::bench::axis<"key-types",
+		atma::bench::type_param<"u64", uint64_t>,
+		atma::bench::type_param<"f32", float>,
+		atma::bench::type_param<"string", std::string>>;
+
+	using value_types_axis = atma::bench::axis<"value-types",
+		atma::bench::type_param<"u64", uint64_t>,
+		atma::bench::type_param<"f32", float>,
+		atma::bench::type_param<"string", std::string>>;
+
+	ATMA_BENCH_SCENARIO("hash-maps", hash_map_axis, key_types_axis, value_types_axis)
+	{
+		using hash_map_type = hash_map_axis_type;
+
+		auto const default_key = key_types_axis_type{};
+		auto const default_value = value_types_axis_type{};
+
+		ATMA_BENCHMARK("insert")
+		{
+			hash_map_type hash_map;
+
+			ATMA_BENCH_SUBMEASURE()
+			{
+				hash_map[default_key] = default_value;
+			}
+
+			hash_map.clear();
+		}
+	}
+}
 #endif
 
-using types_axis = atma::bench::axis<"types",
-	atma::bench::key_value_param<"u64|u64", uint64_t, uint64_t>,
-	atma::bench::key_value_param<"u64|string", uint64_t, std::string>>;
 
-using key_types_axis = atma::bench::axis<"key-types",
-	atma::bench::type_param<"u64", uint64_t>,
-	atma::bench::type_param<"f32", float>,
-	atma::bench::type_param<"string", std::string>>;
-
-using value_types_axis = atma::bench::axis<"value-types",
-	atma::bench::type_param<"u64", uint64_t>,
-	atma::bench::type_param<"f32", float>,
-	atma::bench::type_param<"string", std::string>>;
-
-
-using silliness_axis = atma::bench::axis<"silliness",
-	atma::bench::type_param<"tomfoolery", int>,
-	atma::bench::type_param<"shenanigans", float>>;
-
-//using simple_types_axis = atma::bench::types_axis<"silliness", int, float, char, std::string>;
-
-template <typename HM, typename Types>
-using make_hash_map_t = atma::meta::invoke<HM, Types>;
 
 #if 1
-ATMA_BENCH_SCENARIO("hash-maps", hash_map_axis, types_axis) //key_types_axis, value_types_axis)
+namespace test_dynamic_templated_splatted_construction
 {
-#if USE_SIMPLE_HASH_MAP
-	using hash_map_type = atma::bench::construct_templated_type<
-		hash_map_axis_type,
-		typename types_axis_type::key_type,
-		typename types_axis_type::value_type>;
-#else
-	using hash_map_type = hash_map_axis_type;
-	//auto default_key = key_types_axis_type{};
-	//auto default_value = value_types_axis_type{};
-	auto default_key = types_axis_type::default_key;
-	auto const default_value = types_axis_type::default_value;
-#endif
+	using hash_map_axis = atma::bench::constructed_axis<"hash_map",
+		atma::bench::construct_with_axes<atma::bench::axis2_splat>,
+		atma::bench::templated_param<"std::map", std::map>,
+		atma::bench::templated_param<"std::unordered_map", std::unordered_map>>;
 
+	using types_axis = atma::bench::axis<"types",
+		atma::bench::key_value_param<"u64|u64", uint64_t, uint64_t>,
+		atma::bench::key_value_param<"u64|string", uint64_t, std::string>>;
 
-	ATMA_BENCHMARK("insert")
+	ATMA_BENCH_SCENARIO("hash-maps", hash_map_axis, types_axis)
 	{
-		hash_map_type hash_map;
+		using hash_map_type = hash_map_axis_type;
+		
+		auto default_key = types_axis_type::default_key;
+		auto const default_value = types_axis_type::default_value;
 
-		ATMA_BENCH_SUBMEASURE()
+		ATMA_BENCHMARK("erase")
 		{
+			hash_map_type hash_map;
+
 			hash_map[default_key] = default_value;
+
+			ATMA_BENCH_SUBMEASURE()
+			{
+				hash_map.erase(default_key);
+			}
+
+			ATMA_ASSERT(hash_map.empty());
 		}
-
-		hash_map.clear();
-	}
-
-	ATMA_BENCHMARK("erase")
-	{
-		hash_map_type hash_map;
-
-		hash_map[default_key] = default_value;
-
-		ATMA_BENCH_SUBMEASURE()
-		{
-			hash_map.erase(default_key);
-		}
-
-		ATMA_ASSERT(hash_map.empty());
 	}
 }
 #endif
-
-#if 0
-ATMA_BENCHMARK_SIMPLE("addition", silliness_axis)
-{
-	silliness_axis_type i{};
-	i += 4;
-}
-#endif
-
-
-
-
 
 
 
