@@ -1169,12 +1169,8 @@ namespace test_templated_axis
 #endif
 
 
-
-//using hash_map_axis = atma::bench::axis<"hash_map",
-//	atma::bench::templated_param<"std::map", std::map>,
-//	atma::bench::templated_param<"std::unordered_map", std::unordered_map>>;
 #if 1
-namespace test_dynamic_templated_construction
+namespace test_templated_axis_constructed_dynamically
 {
 	using hash_map_axis = atma::bench::constructed_axis<"hash_map",
 		atma::bench::construct_with_axes<atma::bench::axis2, atma::bench::axis3>,
@@ -1216,7 +1212,7 @@ namespace test_dynamic_templated_construction
 
 
 #if 1
-namespace test_dynamic_templated_splatted_construction
+namespace test_templated_axis_constructed_dynamically_with_splat
 {
 	using hash_map_axis = atma::bench::constructed_axis<"hash_map",
 		atma::bench::construct_with_axes<atma::bench::axis2_splat>,
@@ -1251,6 +1247,45 @@ namespace test_dynamic_templated_splatted_construction
 }
 #endif
 
+
+
+#if 1
+namespace test_templated_axis_constructed_dynamically_with_splat
+{
+	using hash_map_axis = atma::bench::constructed_axis<"hash_map",
+		atma::bench::construct_with_axes<atma::bench::axis2_splat>,
+		atma::bench::templated_param<"std::map", std::map>,
+		atma::bench::templated_param<"std::unordered_map", std::unordered_map>>;
+
+	using types_axis = atma::bench::axis<"types",
+		atma::bench::key_value_param<"u64|u64", uint64_t, uint64_t>,
+		atma::bench::key_value_param<"u64|string", uint64_t, std::string>>;
+
+	//using allocators_axis = atma::
+
+	ATMA_BENCH_SCENARIO("hash-maps", hash_map_axis, types_axis)
+	{
+		using hash_map_type = hash_map_axis_type;
+
+		auto default_key = types_axis_type::default_key;
+		auto const default_value = types_axis_type::default_value;
+
+		ATMA_BENCHMARK("erase")
+		{
+			hash_map_type hash_map;
+
+			hash_map[default_key] = default_value;
+
+			ATMA_BENCH_SUBMEASURE()
+			{
+				hash_map.erase(default_key);
+			}
+
+			ATMA_ASSERT(hash_map.empty());
+		}
+	}
+}
+#endif
 
 
 
