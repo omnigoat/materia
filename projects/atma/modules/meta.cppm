@@ -44,15 +44,13 @@ export namespace atma::meta
 // integral operations
 export namespace atma::meta
 {
-	template <typename x> using inc = integral_constant_of<++x()>;
-	template <typename x> using dec = integral_constant_of<--x()>;
+	template <typename x> using inc = integral_constant_of<x::value + 1>;
+	template <typename x> using dec = integral_constant_of<x::value - 1>;
 
 	template <typename x, typename y> using mul = integral_constant_of<x() * y()>;
 	template <typename x, typename y> using div = integral_constant_of<x() / y()>;
 	template <typename x, typename y> using add = integral_constant_of<x() + y()>;
 	template <typename x, typename y> using sub = integral_constant_of<x() - y()>;
-
-	template <typename x> using not_ = bool_<!x::value>;
 }
 
 
@@ -154,7 +152,7 @@ namespace atma::meta::lazy::detail
 export namespace atma::meta::lazy
 {
 	template <typename F, size_t Sz>
-	using dcc = typename detail::dcc_impl<F, Sz < 1024>;
+	using dcc = typename detail::dcc_impl<F, Sz < 1024*1024>;
 
 	template <template <typename...> typename F, typename... Args>
 	using dccf = typename detail::dccf_impl<(sizeof...(Args) > 0)>::template f<F, Args...>;
@@ -365,11 +363,7 @@ export namespace atma::meta
 {
 	namespace lazy
 	{
-		struct listify
-		{
-			template <typename... Es>
-			using f = list<Es...>;
-		};
+		using listify = cfe<list>;
 	}
 
 	template <typename... Es>
@@ -822,6 +816,13 @@ export namespace atma::meta
 export namespace atma::meta::lazy
 {
 	template <typename C = identity>
+	struct not_
+	{
+		template <typename x>
+		using f = typename C::template f<bool_<!x::value>>;
+	};
+
+	template <typename C = identity>
 	struct and_
 	{
 		template <typename A, typename B>
@@ -843,6 +844,9 @@ export namespace atma::meta
 
 	template <typename A, typename B>
 	using or_ = bool_<A::value || B::value>;
+
+	template <typename x>
+	using not_ = bool_<!x::value>;
 }
 
 
@@ -883,6 +887,11 @@ export namespace atma::meta::lazy
 	{
 		template <typename... lists>
 		using f = invoke<foldl<detail::_list_join_impl_, unpack<C>>,
+			list<>,
+			lists...>;
+
+		template <typename CC, typename... lists>
+		using cf = invoke<foldl<detail::_list_join_impl_, unpack<CC>>,
 			list<>,
 			lists...>;
 	};
@@ -1171,10 +1180,11 @@ export namespace atma::meta::lazy
 	struct exec
 	{
 		template <typename... args>
-		using f = ccf<step, exec<rest...>, args...>;
+		using f = //ccf<step, exec<rest...>, args...>;
+			typename dcc<step, sizeof...(args)>::template cf<exec<rest...>, args...>; //dcc<step, sizeof...(Args)>::template cf<Args...>;
 
-		//template <typename CC, typename... args>
-		//using cf = ccf<step, _exec_<CC, rest...>, args...>;
+		template <typename CC, typename... args>
+		using cf = ccf<step, _exec_<CC, rest...>, args...>;
 	};
 
 	template <typename last_step>
@@ -1436,11 +1446,13 @@ export void test_mythings()
 
 	static_assert(std::is_same_v<
 		//list<bool_<true>, bool_<false>, bool_<true>, bool_<false>>,
-		list<bool_<false>, bool_<true>, bool_<false>, bool_<true>>,
+		int_<14>,
 		invoke<lazy::exec<
-			lazy::map<lazy::cfl<std::is_integral>>,
-			lazy::map<lazy::cfe<not_>>
-		>, int, float, short, double>
+			lazy::map<lazy::cfl<inc>>,
+			lazy::foldl<lazy::cfl<add>>
+			//lazy::map<lazy::cfe<not_>>,
+			//lazy::foldl<
+		>, int_<1>, int_<2>, int_<3>, int_<4>>
 	>);
 
 	//static_assert(std::is_same_v<

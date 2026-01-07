@@ -72,11 +72,14 @@ namespace atma::bench
 	template <typename f, typename... args>
 	using construct_templated_type = meta::invoke<f, args...>;
 
-	template <typename F>
+	template <typename Param>
 	struct lazy_construct_templated_type
 	{
+		template <typename CC, typename... args>
+		using cf = typename CC::template f<typename Param::payload_type::template f<args...>>;
+
 		template <typename... args>
-		using f = meta::invoke<typename F::payload_type, args...>;
+		using f = meta::lazy::cc<typename Param::payload_type, args...>;
 	};
 
 
@@ -217,26 +220,28 @@ namespace atma::bench
 		//template <typename... Payloads>
 		//using f2 = 
 
-		//template <typename... Params>
-		//using map_to_payloads = meta::lazy::map<extract_payload<relistify_t<typename Params::payload_type>...>>>;
+		template <typename... Params>
+		using map_to_payloads = meta::lazy::map<extract_payload<relistify_t<typename Params::payload_type>...>>;
 
-
-		//template <typename Param, typename... Params>
-		//using g = param<Param::name,
-		//	meta::lazy::exec<
-		//		map_to_payloads<Params...>,
-		//		meta::lazy::list_join<>,
-		//		lazy_construct_templated_type<Param>
-		//	>;
 
 		template <typename Param, typename... Params>
 		using f = param<Param::name,
 			meta::invoke<
-				meta::lazy::map<
-					extract_payload<relistify_t<typename Params::payload_type>...>,
-					meta::lazy::list_join<
-						lazy_construct_templated_type<Param>>>,
+				meta::lazy::exec
+				<
+					map_to_payloads<Params...>,
+					meta::lazy::list_join<>,
+					lazy_construct_templated_type<Param>
+				>,
 				decltype(axes)...>>;
+
+		//template <typename Param, typename... Params>
+		//using f = param<Param::name,
+		//	meta::invoke<
+		//		meta::lazy::map<extract_payload<relistify_t<typename Params::payload_type>...>,
+		//		meta::lazy::list_join<
+		//		lazy_construct_templated_type<Param>>>,
+		//		decltype(axes)...>>;
 
 	};
 }
