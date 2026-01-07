@@ -159,15 +159,15 @@ namespace atma::bench
 		static constexpr bool splat = splat_vv;
 	};
 
-	constexpr axistag<0, false> axis1;
-	constexpr axistag<1, false> axis2;
-	constexpr axistag<2, false> axis3;
-	constexpr axistag<3, false> axis4;
+	using axis1 = axistag<0, false>;
+	using axis2 = axistag<1, false>;
+	using axis3 = axistag<2, false>;
+	using axis4 = axistag<3, false>;
 
-	constexpr axistag<0, true> axis1_splat;
-	constexpr axistag<1, true> axis2_splat;
-	constexpr axistag<2, true> axis3_splat;
-	constexpr axistag<3, true> axis4_splat;
+	using axis1_splat = axistag<0, true>;
+	using axis2_splat = axistag<1, true>;
+	using axis3_splat = axistag<2, true>;
+	using axis4_splat = axistag<3, true>;
 
 
 	template <typename T, typename = std::void_t<>>
@@ -185,16 +185,35 @@ namespace atma::bench
 	template <typename T>
 	using relistify_t = typename relistify<T>::type;
 
+	template <typename... axes>
+	struct construct_with_axes;
+
 	// returns a list containing either a single element - the payload
 	// of the axis. if _splatting_ was asked for, instead returns a list
 	// containing the relistified payloads elements "unwrapped"
-	template <typename... Params>
+	//template <typename axis, typename... Params>
+	//struct extract_payload_impl
+	//{
+	//	using f = meta::if_<axis::splat,
+	//		meta::invoke<meta::lazy::at<axis>, construct_with_axes< relistify_t<typename Params::payload_type>...>,
+	//		meta::list<meta::invoke<meta::lazy::at<axis>, relistify_t<typename Params::payload_type>...>>>;
+	//};
+	//
+	//template <string_literal Name, typename... AP, typename... Params>
+	//struct extract_payload_impl<basic_axis<Name, constructor_identity, AP...>, Params...>
+	//{
+	//	using f = meta::if_<axis::splat,
+	//		meta::invoke<meta::lazy::at<axis>, relistify_t<typename Params::payload_type>...>,
+	//		meta::list<meta::invoke<meta::lazy::at<axis>, relistify_t<typename Params::payload_type>...>>>;
+	//};
+
+	template <typename Param, typename... Params>
 	struct extract_payload
 	{
 		template <typename axis>
 		using f = meta::if_<axis::splat,
-			meta::invoke<meta::lazy::at<axis>, Params...>,
-			meta::list<meta::invoke<meta::lazy::at<axis>, Params...>>>;
+			meta::invoke<meta::lazy::at<axis>, relistify_t<typename Params::payload_type>...>,
+			meta::list<meta::invoke<meta::lazy::at<axis>, relistify_t<typename Params::payload_type>...>>>;
 	};
 
 	// 1. turn axes into list of indices
@@ -209,40 +228,19 @@ namespace atma::bench
 		using f = meta::bool_<A::name == B::name>;
 	};
 
-	template <auto... axes>
+	template <typename... axes_idxs>
 	struct construct_with_axes
 	{
-		// remove our param from the list and replace it with invalid_axis,
-		// and then recursively instantiate dynamically-constructible axes
-		//template <typename Param, typename... Params>
-		//using g = meta::remove_if<names_eq<Param>, Params...>;
-
-		//template <typename... Payloads>
-		//using f2 = 
-
-		template <typename... Params>
-		using map_to_payloads = meta::lazy::map<extract_payload<relistify_t<typename Params::payload_type>...>>;
-
-
 		template <typename Param, typename... Params>
 		using f = param<Param::name,
 			meta::invoke<
 				meta::lazy::exec
 				<
-					map_to_payloads<Params...>,
+					meta::lazy::map<extract_payload<Param, Params...>>,
 					meta::lazy::list_join<>,
 					lazy_construct_templated_type<Param>
 				>,
-				decltype(axes)...>>;
-
-		//template <typename Param, typename... Params>
-		//using f = param<Param::name,
-		//	meta::invoke<
-		//		meta::lazy::map<extract_payload<relistify_t<typename Params::payload_type>...>,
-		//		meta::lazy::list_join<
-		//		lazy_construct_templated_type<Param>>>,
-		//		decltype(axes)...>>;
-
+				axes_idxs...>>;
 	};
 }
 
@@ -951,7 +949,7 @@ namespace atma::bench
 		}
 
 		template <typename T>
-		using get_constructor = typename meta::at<0, T>::constructor_type;
+		using get_constructor_t = typename meta::at<0, T>::constructor_type;
 
 		auto measure_all() -> scenario_result_t override
 		{
@@ -959,7 +957,7 @@ namespace atma::bench
 			{
 				([&]<typename... Axes>(meta::list<Axes...>)
 				{
-					this->execute_wrapper<meta::invoke<get_constructor<Axes>, meta::at<1, Axes>, meta::at<1, Axes>...>...>();
+					this->execute_wrapper<meta::invoke<get_constructor_t<Axes>, meta::at<1, Axes>, meta::at<1, Axes>...>...>();
 				}(meta::zip<axes_type, Combos>{}), ...);
 			}(combinations{});
 
