@@ -35,6 +35,9 @@ export namespace atma::meta
 	template <uint32_t     x> using uint32_  = integral_constant_of<x>;
 	template <uint64_t     x> using uint64_  = integral_constant_of<x>;
 	template <size_t       x> using usize_   = integral_constant_of<x>;
+
+	constexpr auto false_v = bool_<false>{};
+	constexpr auto true_v = bool_<true>{};
 }
 
 
@@ -48,6 +51,8 @@ export namespace atma::meta
 	template <typename x, typename y> using div = integral_constant_of<x() / y()>;
 	template <typename x, typename y> using add = integral_constant_of<x() + y()>;
 	template <typename x, typename y> using sub = integral_constant_of<x() - y()>;
+
+	template <typename x> using not_ = bool_<!x::value>;
 }
 
 
@@ -238,20 +243,20 @@ export namespace atma::meta::lazy
 }
 
 
-//
-// continuation-from-eager
-// -------------------------
-//
-// Since all continuations/metafunctions in our metaprogram have
-// their main operands sent through member-alias 'f', then any
-// (usually eager-written) metafunction that processes all its
-// template arguments as class-arguments must be converted.
-// 
-//    template <typename A, typename B>
-//    using less_than = bool_<A::value < B::value>;
-// 
-//    cfe<less_than, Continuation>
-//
+///
+/// continuation-from-eager
+/// -------------------------
+///
+/// Since all continuations/metafunctions in our metaprogram have
+/// their main operands sent through member-alias 'f', then any
+/// (usually eager-written) metafunction that processes all its
+/// template arguments as class-arguments must be converted.
+/// 
+///    template <typename A, typename B>
+///    using less_than = bool_<A::value < B::value>;
+/// 
+///    cfe<less_than, Continuation>
+///
 export namespace atma::meta::lazy
 {
 	template <template <typename...> class F, typename C = identity>
@@ -268,6 +273,32 @@ export namespace atma::meta::lazy
 		using f = dccf<F, Args...>;
 	};
 }
+
+
+///
+/// continuation-from-precomputed-eager
+/// -------------------------------------
+///
+///   template <typename T>
+///   struct is_integral
+///   {
+///      using type = <computed-value>;
+///   };
+/// 
+///   
+///
+//export namespace atma::meta::lazy
+//{
+//	template <template <typename...> typename V, typename C = identity>
+//	struct cfv
+//	{
+//		template <typename... args>
+//		using f = typename C::template f<typename dccf<V, args...>::type>;
+//	};
+//}
+
+
+
 
 //
 // continuation-from-lazy
@@ -299,23 +330,6 @@ export namespace atma::meta::lazy
 		using f = typename dccf<F, Args...>::type;
 	};
 }
-
-//
-// continuation-from-value
-// -------------------------
-//
-// requires explanation
-//
-export namespace atma::meta::lazy
-{
-	template <typename T, typename C = identity>
-	struct cfv
-	{
-		template <typename...>
-		using f = typename C::template f<T>;
-	};
-}
-
 
 // invoke
 export namespace atma::meta
@@ -676,15 +690,15 @@ export namespace atma::meta
 //
 namespace atma::meta::lazy::detail
 {
-	template <size_t Argc>
+	template <bool>
 	struct _foldl_
 	{
 		template <typename F, typename Acc, typename Arg0, typename... Args>
-		using f = typename _foldl_<sizeof...(Args)>::template f<F, typename F::template f<Acc, Arg0>, Args...>;
+		using f = typename _foldl_<(sizeof...(Args) > 0)>::template f<F, typename F::template f<Acc, Arg0>, Args...>;
 	};
 
 	template <>
-	struct _foldl_<0>
+	struct _foldl_<false>
 	{
 		template <typename, typename Acc>
 		using f = Acc;
@@ -697,7 +711,7 @@ export namespace atma::meta::lazy
 	struct foldl
 	{
 		template <typename Init, typename... Args>
-		using f = typename C::template f<typename detail::_foldl_<sizeof...(Args)>::template f<F, Init, Args...>>;
+		using f = typename C::template f<typename detail::_foldl_<(sizeof...(Args) > 0)>::template f<F, Init, Args...>>;
 	};
 }
 
@@ -843,11 +857,11 @@ namespace atma::meta::lazy::detail
 	template <typename lhs, typename rhs>
 	struct _list_join_impl2_;
 
-	template <typename... lhs, typename rhs>
-	struct _list_join_impl2_<list<lhs...>, rhs>
-	{
-		using type = list<lhs..., rhs>;
-	};
+	//template <typename... lhs, typename rhs>
+	//struct _list_join_impl2_<list<lhs...>, rhs>
+	//{
+	//	using type = list<lhs..., rhs>;
+	//};
 
 	template <typename... lhs, typename... rhs>
 	struct _list_join_impl2_<list<lhs...>, list<rhs...>>
@@ -868,8 +882,7 @@ export namespace atma::meta::lazy
 	struct list_join
 	{
 		template <typename... lists>
-		using f = invoke<
-			foldl<detail::_list_join_impl_>,
+		using f = invoke<foldl<detail::_list_join_impl_, unpack<C>>,
 			list<>,
 			lists...>;
 	};
@@ -911,7 +924,9 @@ export namespace atma::meta::lazy
 	struct if_
 	{
 		template <typename... Args>
-		using f = typename detail::_if_<dcc<Predicate, sizeof...(Args)>::template f<Args...>::value, TC, FC>::template f<Args...>;
+		using f = typename detail::_if_<
+			dcc<Predicate, sizeof...(Args)>::template f<Args...>::value,
+			TC, FC>::template f<Args...>;
 	};
 }
 
@@ -1070,9 +1085,9 @@ export namespace atma::meta
 	using select_combinations_t = lazy::cc<lazy::select_combinations<>, lists_tt...>;
 }
 
-#if 0
 export namespace atma::meta::lazy
 {
+#if 0
 	namespace detail
 	{
 		
@@ -1136,6 +1151,7 @@ export namespace atma::meta::lazy
 		template <typename arg0, typename... args>
 		using f = cc<F<arg0, trailing_args_tt...>, args...>;
 	};
+#endif
 
 	template <typename C, typename step, typename... rest>
 	struct _exec_
@@ -1157,20 +1173,21 @@ export namespace atma::meta::lazy
 		template <typename... args>
 		using f = ccf<step, exec<rest...>, args...>;
 
-		template <typename CC, typename... args>
-		using cf = ccf<step, _exec_<CC, rest...>, args...>;
+		//template <typename CC, typename... args>
+		//using cf = ccf<step, _exec_<CC, rest...>, args...>;
 	};
 
 	template <typename last_step>
-	struct exec<typename last_step>
+	struct exec<last_step>
 	{
 		template <typename... args>
 		using f = cc<last_step, args...>;
 
-		template <typename CC, typename... args>
-		using cf = ccf<last_step, CC, args...>;
+		//template <typename CC, typename... args>
+		//using cf = ccf<last_step, CC, args...>;
 	};
 
+#if 0
 #if 1
 	template <typename C, typename idxs>
 	struct _make_index_sequence_;
@@ -1263,8 +1280,8 @@ export namespace atma::meta::lazy
 	>
 
 #endif
-}
 #endif
+}
 
 
 //
@@ -1403,11 +1420,28 @@ struct oper_action<oper<Op, Value>, A>
 template <typename A, typename B>
 using oper_action_t = typename oper_action<A, B>::type;
 
+template <typename...>
+struct no;
+
+
+
 export void test_mythings()
 {
 	using namespace atma;
 	using namespace atma::meta;
 
+	//no<invoke<lazy::exec<
+	//	lazy::map<lazy::cfl<std::is_integral>>
+	//>, int, float, short, double>> {};
+
+	static_assert(std::is_same_v<
+		//list<bool_<true>, bool_<false>, bool_<true>, bool_<false>>,
+		list<bool_<false>, bool_<true>, bool_<false>, bool_<true>>,
+		invoke<lazy::exec<
+			lazy::map<lazy::cfl<std::is_integral>>,
+			lazy::map<lazy::cfe<not_>>
+		>, int, float, short, double>
+	>);
 
 	//static_assert(std::is_same_v<
 	//	list<bool_<true>, bool_<true>, bool_<true>, bool_<false>>,
