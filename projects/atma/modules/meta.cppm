@@ -36,8 +36,8 @@ export namespace atma::meta
 	template <uint64_t     x> using uint64_  = integral_constant_of<x>;
 	template <size_t       x> using usize_   = integral_constant_of<x>;
 
-	constexpr auto false_v = bool_<false>{};
-	constexpr auto true_v = bool_<true>{};
+	using false_ = bool_<false>;
+	using true_ = bool_<true>;
 }
 
 
@@ -262,6 +262,9 @@ export namespace atma::meta::lazy
 	{
 		template <typename... Args>
 		using f = typename C::template f<dccf<F, Args...>>;
+
+		template <typename CC, typename... Args>
+		using cf = typename CC::template f<dccf<F, Args...>>;
 	};
 
 	template <template <typename...> class F>
@@ -297,18 +300,11 @@ export namespace atma::meta::lazy
 
 
 
-
 //
 // continuation-from-lazy
 // ------------------------
 //
-//    struct less_than
-//    {
-//        template <typename A, typename B>
-//        using type = bool_<A::value < B::value>;
-//    };
-// 
-//    non-mpl lazy function  ->  mpl-approved lazy function
+//    
 // 
 //    cfl<less_than, Continuation>
 //
