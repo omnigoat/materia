@@ -21,10 +21,12 @@ module;
 
 #include <atma/assert.hpp>
 #include <atma/ranges/zip.hpp>
+#include <atma/arena_allocator.hpp>
 
 export module atma.benchmark;
 
 import atma.types;
+import atma.aligned_allocator;
 
 export namespace atma::bench
 {
@@ -85,10 +87,12 @@ namespace atma::bench
 	using type_param = param_t<name, T>;
 
 	// templated-param
-	template <string_literal name, template <typename...> typename type>
-	using templated_param = param_t<name, meta::lazy::cfe<type>, param_templated>;
+	template <string_literal name, template <typename...> typename type, typename constructor = param_templated>
+	using templated_param = param_t<name, meta::lazy::cfe<type>, constructor>;
 
-
+	// constructed-param
+	template <string_literal name, typename constructor = param_templated>
+	using constructed_param = param_t<name, meta::nothing, constructor>;
 
 	template <typename f, typename... args>
 	using construct_templated_type = meta::invoke<f, args...>;
@@ -200,7 +204,7 @@ namespace atma::bench
 	using relistify_t = typename relistify<T>::type;
 
 	template <typename... axes>
-	struct construct_with_axes;
+	struct construct_from_axes;
 
 	// returns a list containing either a single element - the payload
 	// of the axis. if _splatting_ was asked for, instead returns a list
@@ -340,7 +344,7 @@ namespace atma::bench
 	template <typename... axes, typename... axcds, typename params, typename axis, typename param_>
 	struct construct_with_axes_impl<meta::list<axes...>, meta::list<axcds...>, params, axis, param_>
 	{
-		using axes_ = meta::invoke<meta::lazy::map<replace_axis_with_nonesuch<axis>>, axes...>;
+		using axes_ = meta::list<axes...>; // meta::invoke<meta::lazy::map<replace_axis_with_nonesuch<axis>>, axes...>;
 
 		//using what_ = decltype(no<axes_>{});
 
@@ -372,14 +376,22 @@ namespace atma::bench
 	};
 
 	template <typename... axes_cds>
-	struct construct_with_axes
+	struct construct_from_axes
 	{
 		template <typename axes_list, typename params_list, typename axis, typename param>
 		using f = typename construct_with_axes_impl<axes_list, meta::list<axes_cds...>, params_list, axis, param>::type;
 	};
+
+	//template < typename... axes_cds>
+	//struct construct_from_axes_with
+	//{
+	//	template <typename axes_list, typename params_list, typename axis, typename param>
+	//	using f = typename construct_with_axes_impl<axes_list, meta::list<axes_cds...>, params_list, axis, param>::type;
+	//};
+
 #else
 	template <typename... axes_idxs>
-	struct construct_with_axes
+	struct construct_from_axes
 	{
 		template <typename Param, typename axes_list, typename params_list>
 		using f = param<Param::name,
@@ -1301,7 +1313,7 @@ namespace test_templated_axis_constructed_dynamically
 	namespace abl = atma::bench;
 
 	using hash_map_axis = atma::bench::templated_axis<"hash_map",
-		abl::construct_with_axes<abl::axis2, abl::axis3>,
+		abl::construct_from_axes<abl::axis2, abl::axis3>,
 		abl::templated_param<"std::map", std::map>,
 		abl::templated_param<"std::unordered_map", std::unordered_map>>;
 
@@ -1345,7 +1357,7 @@ namespace test_templated_axis_constructed_dynamically_with_splat
 	namespace ab = atma::bench;
 
 	using hash_map_axis = atma::bench::templated_axis<"hash_map",
-		ab::construct_with_axes<ab::splat<ab::axis2>>,
+		ab::construct_from_axes<ab::splat<ab::axis2>>,
 		ab::templated_param<"std::map", std::map>,
 		ab::templated_param<"std::unordered_map", std::unordered_map>>;
 
@@ -1384,18 +1396,47 @@ namespace test_templated_axis_constructed_dynamically_with_splat2
 {
 	namespace ab = atma::bench;
 
+	struct map_constructor
+	{
+		template <typename payload, typename key, typename value, typename allocator>
+		using f = std::map<key, value, std::less<key>, allocator>;
+	};
+
+	struct unordered_map_constructor
+	{
+		template <typename payload, typename key, typename value, typename allocator>
+		using f = std::unordered_map<key, value, std::hash<key>, std::equal_to<key>, allocator>;
+	};
+
 	using hash_map_axis = atma::bench::templated_axis<"hash_map",
-		ab::construct_with_axes<ab::splat<ab::axis2>>,
-		ab::templated_param<"std::map", std::map>,
-		ab::templated_param<"std::unordered_map", std::unordered_map>>;
+		ab::construct_from_axes<ab::splat<ab::axis2>, ab::axis3>,
+		ab::constructed_param<"std::map", map_constructor>,
+		ab::constructed_param<"std::unordered_map", unordered_map_constructor>>;
 
 	using types_axis = atma::bench::axis<"types",
 		atma::bench::key_value_param<"u64|u64", uint64_t, uint64_t>,
 		atma::bench::key_value_param<"u64|string", uint64_t, std::string>>;
 
-	//using allocators_axis = atma::
 
-	ATMA_BENCH_SCENARIO("hash-maps", hash_map_axis, types_axis)
+	struct allocator_constructor
+	{
+		template <typename payload, typename key, typename value>
+		using f = atma::meta::invoke<payload, std::pair<key const, value>>;
+	};
+
+	struct aligned_allocator_constructor
+	{
+		template <typename payload, typename key, typename value>
+		using f = atma::aligned_allocator_t<std::pair<key const, value>>;
+	};
+
+	using allocators_axis = ab::templated_axis<"allocators",
+		ab::construct_from_axes<ab::splat<ab::axis2>>,
+		ab::templated_param<"std::allocator", std::allocator, allocator_constructor>,
+		//ab::templated_param<"arena_allocator", atma::arena_allocator_t, allocator_constructor>,
+		ab::constructed_param<"aligned_allocator", aligned_allocator_constructor>>;
+
+	ATMA_BENCH_SCENARIO("hash-maps", hash_map_axis, types_axis, allocators_axis)
 	{
 		using hash_map_type = hash_map_axis_type;
 
