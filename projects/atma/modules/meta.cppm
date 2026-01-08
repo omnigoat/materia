@@ -6,79 +6,18 @@ module;
 #include <utility>
 #include <type_traits>
 
+#include <atma/unit_test.hpp>
+
 export module atma.meta;
 
 
-// nullptr_v
-namespace atma::meta
-{
-	export template <typename T>
-	inline constexpr T* nullptr_v = nullptr;
-}
+template <typename...>
+struct no;
 
 
-// integral types
-export namespace atma::meta
-{
-	struct nothing {};
-
-	template <typename...>
-	using void_ = void;
-
-	template <auto x>
-	using integral_constant_of = std::integral_constant<decltype(x), x>;
-
-	template <bool         x> using bool_    = integral_constant_of<x>;
-	template <char         x> using char_    = integral_constant_of<x>;
-	template <int          x> using int_     = integral_constant_of<x>;
-	template <unsigned int x> using uint_    = integral_constant_of<x>;
-	template <uint32_t     x> using uint32_  = integral_constant_of<x>;
-	template <uint64_t     x> using uint64_  = integral_constant_of<x>;
-	template <size_t       x> using usize_   = integral_constant_of<x>;
-
-	using false_ = bool_<false>;
-	using true_ = bool_<true>;
-}
-
-
-// integral operations
-export namespace atma::meta
-{
-	template <typename x> using inc = integral_constant_of<x::value + 1>;
-	template <typename x> using dec = integral_constant_of<x::value - 1>;
-
-	template <typename x, typename y> using mul = integral_constant_of<x() * y()>;
-	template <typename x, typename y> using div = integral_constant_of<x() / y()>;
-	template <typename x, typename y> using add = integral_constant_of<x() + y()>;
-	template <typename x, typename y> using sub = integral_constant_of<x() - y()>;
-}
-
-
-// any_t
-export namespace atma::meta
-{
-	template <typename T = void>
-	struct any_t
-	{
-		constexpr any_t() = default;
-
-		constexpr any_t(T&&)
-		{}
-	};
-
-	template <>
-	struct any_t<void>
-	{
-		constexpr any_t() = default;
-
-		template <typename T>
-		constexpr any_t(T&&)
-		{}
-	};
-}
-
-
-// identity
+///
+/// identity
+/// 
 export namespace atma::meta::lazy
 {
 	struct identity
@@ -95,7 +34,9 @@ export namespace atma::meta
 }
 
 
-// constant? name?
+///
+/// constant
+/// 
 export namespace atma::meta::lazy
 {
 	template <typename C>
@@ -106,18 +47,20 @@ export namespace atma::meta::lazy
 	};
 }
 
-
+#if 0
 // typeval
 namespace atma::meta
 {
 	template <typename T>
 	constexpr auto tv_ = T::type::value;
 }
+#endif
 
 
-//
-// dependent call
-//
+///
+/// dependent call
+/// ----------------
+/// 
 namespace atma::meta::lazy::detail
 {
 	// dependent-call
@@ -147,23 +90,27 @@ namespace atma::meta::lazy::detail
 
 }
 
-// dependent-call
-// ----------------
 export namespace atma::meta::lazy
 {
+	// dependent-call
 	template <typename F, size_t Sz>
-	using dcc = typename detail::dcc_impl<F, Sz < 1024*1024>;
+	using dcc = typename detail::dcc_impl<F, Sz < 1'000'000>;
 
+	// dependent-call-function-template
 	template <template <typename...> typename F, typename... Args>
 	using dccf = typename detail::dccf_impl<(sizeof...(Args) > 0)>::template f<F, Args...>;
 }
 
-#if 1
-// call-continuation
-// -------------------
-// 
-//  yeah requires explanation
-//
+
+///
+/// call-continuation
+/// -------------------
+/// calls a generic metafunction with variable arguments, even
+/// if that metafunction doesn't take variable arguments (as long
+/// as the number of supplied arguments is correct). even if the
+/// number of arguments is correct, compilers throw errors about it
+/// without some serious trickery.
+///
 export namespace atma::meta::lazy
 {
 	template <typename F, typename... Args>
@@ -171,73 +118,6 @@ export namespace atma::meta::lazy
 
 	template <typename F, typename... Args>
 	using ccf = typename dcc<F, sizeof...(Args)>::template cf<Args...>;
-}
-#else
-// defer
-namespace atma::meta::lazy::detail
-{
-	template <bool, typename>
-	struct _defer_
-	{};
-
-	template <typename F>
-	struct _defer_<true, F> : F
-	{};
-}
-
-// call-continuation
-// -------------------
-//  yeah requires explanation
-export namespace atma::meta::lazy
-{
-	template <typename F, typename... Ts>
-	using cc = typename detail::_defer_<(sizeof(Ts...) < 1'000'000), F>::template apply<Ts...>;
-}
-#endif
-
-
-//
-// continuation-from-eager-template
-// ----------------------------------
-//
-// Since all continuations/metafunctions in our metaprogram have
-// their main operands sent through member-alias 'f', then any
-// (usually eager-written) metafunction that processes all its
-// template arguments as class-arguments must be converted.
-// 
-//    template <typename A, typename B>
-//    struct less_than
-//    {
-//        using type = bool_<A::value < B::value>;
-//    };
-//
-namespace atma::meta::lazy::detail
-{
-	template <typename F, typename C = identity>
-	struct cfu_impl
-	{
-		template <typename... Args>
-		struct fn
-		{
-			using f = cc<C, typename F::template f<Args...>>;
-		};
-	};
-
-	template <typename F>
-	struct cfu_impl<F, identity>
-	{
-		template <typename... Args>
-		struct fn
-		{
-			using f = typename F::template f<Args...>;
-		};
-	};
-}
-
-export namespace atma::meta::lazy
-{
-	template <typename F, typename C = identity>
-	using cfu = typename detail::cfu_impl<F, C>::fn;
 }
 
 
@@ -247,13 +127,15 @@ export namespace atma::meta::lazy
 ///
 /// Since all continuations/metafunctions in our metaprogram have
 /// their main operands sent through member-alias 'f', then any
-/// (usually eager-written) metafunction that processes all its
+/// (usually type-alias) metafunction that processes all its
 /// template arguments as class-arguments must be converted.
 /// 
 ///    template <typename A, typename B>
 ///    using less_than = bool_<A::value < B::value>;
 /// 
-///    cfe<less_than, Continuation>
+///    using lazy_less_than = cfe<less_than, Continuation>;
+/// 
+///    using lazy_make_signed = cfe<std::make_signed_t, Continuation>;
 ///
 export namespace atma::meta::lazy
 {
@@ -269,72 +151,162 @@ export namespace atma::meta::lazy
 
 	template <template <typename...> class F>
 	struct cfe<F, identity>
-	{ // specialization for identity - no need to continue
-		template <typename... Args>
-		using f = dccf<F, Args...>;
-	};
-}
-
-
-///
-/// continuation-from-precomputed-eager
-/// -------------------------------------
-///
-///   template <typename T>
-///   struct is_integral
-///   {
-///      using type = <computed-value>;
-///   };
-/// 
-///   
-///
-//export namespace atma::meta::lazy
-//{
-//	template <template <typename...> typename V, typename C = identity>
-//	struct cfv
-//	{
-//		template <typename... args>
-//		using f = typename C::template f<typename dccf<V, args...>::type>;
-//	};
-//}
-
-
-
-//
-// continuation-from-lazy
-// ------------------------
-//
-//    
-// 
-//    cfl<less_than, Continuation>
-//
-export namespace atma::meta::lazy
-{
-	template <template <typename...> class F, typename C = identity>
-	struct cfl
 	{
 		template <typename... Args>
-		using f = typename C::template f<typename dccf<F, Args...>::type>;
-	};
+		using f = dccf<F, Args...>;
 
-	template <template <typename...> class F>
-	struct cfl<F, identity>
-	{ // specialization for identity - no need to continue
-		template <typename... Args>
-		using f = typename dccf<F, Args...>::type;
+		template <typename CC, typename... Args>
+		using cf = typename CC::template f<dccf<F, Args...>>;
 	};
 }
 
-// invoke
+
+///
+/// continuation-from-eager-type
+/// ------------------------------
+///
+/// Many standard library and third-party libraries define traits
+/// or metafunctions via a member-type named 'type'. This adapts
+/// this pattern into a mpl metafunction.
+/// 
+///   template <typename A, typename B>
+///   struct less_than
+///   {
+///      using type = bool_<A() < B()>;
+///   };
+/// 
+///   using lazy_less_than = cfet<less_than>;
+/// 
+///   # equates to bool_<true>
+///   invoke<lazy_less_than, int_<3>, int_<4>>
+///
+export namespace atma::meta::lazy
+{
+	template <template <typename...> typename F, typename C = identity>
+	struct cfet
+	{
+		template <typename... args>
+		using f = typename C::template f<typename dccf<F, args...>::type>;
+
+		template <typename CC, typename... args>
+		using cf = typename CC::template f<typename dccf<F, args...>::type>;
+	};
+
+	template <template <typename...> typename F>
+	struct cfet<F, identity>
+	{
+		template <typename... args>
+		using f = typename dccf<F, args...>::type;
+
+		template <typename CC, typename... args>
+		using cf = typename CC::template f<typename dccf<F, args...>::type>;
+	};
+}
+
+
+///
+/// invoke
+/// 
 export namespace atma::meta
 {
 	template <typename F, typename... Args>
 	using invoke = typename F::template f<Args...>;
 }
 
-//
-// list
-//
+
+
+///
+/// nullptr_v
+///
+#if 0
+namespace atma::meta
+{
+	export template <typename T>
+	inline constexpr T* nullptr_v = nullptr;
+}
+#endif
+
+
+///
+/// basic types
+/// 
+export namespace atma::meta
+{
+	struct nothing {};
+
+	template <typename...>
+	using void_ = void;
+
+	template <auto x>
+	using integral_constant_of = std::integral_constant<decltype(x), x>;
+
+	template <bool         x> using bool_    = integral_constant_of<x>;
+	template <char         x> using char_    = integral_constant_of<x>;
+	template <int          x> using int_     = integral_constant_of<x>;
+	template <unsigned int x> using uint_    = integral_constant_of<x>;
+	template <uint32_t     x> using uint32_  = integral_constant_of<x>;
+	template <uint64_t     x> using uint64_  = integral_constant_of<x>;
+	template <size_t       x> using usize_   = integral_constant_of<x>;
+
+	using false_ = bool_<false>;
+	using true_ = bool_<true>;
+}
+
+
+///
+/// integral operations
+/// 
+export namespace atma::meta
+{
+	template <typename x> using inc = integral_constant_of<x::value + 1>;
+	template <typename x> using dec = integral_constant_of<x::value - 1>;
+
+	template <typename x, typename y> using mul = integral_constant_of<x() * y()>;
+	template <typename x, typename y> using div = integral_constant_of<x() / y()>;
+	template <typename x, typename y> using add = integral_constant_of<x() + y()>;
+	template <typename x, typename y> using sub = integral_constant_of<x() - y()>;
+}
+
+export namespace atma::meta::lazy
+{
+	using mul = cfe<meta::mul>;
+	using div = cfe<meta::div>;
+	using add = cfe<meta::add>;
+	using sub = cfe<meta::sub>;
+}
+
+
+///
+/// any_t
+/// 
+export namespace atma::meta
+{
+	template <typename T = void>
+	struct any_t
+	{
+		constexpr any_t() = default;
+
+		constexpr any_t(T&&)
+		{}
+	};
+
+	template <>
+	struct any_t<void>
+	{
+		constexpr any_t() = default;
+
+		template <typename T>
+		constexpr any_t(T&&)
+		{}
+	};
+}
+
+
+
+
+///
+/// list
+///
 export namespace atma::meta
 {
 	template <typename... es>
@@ -352,23 +324,36 @@ export namespace atma::meta
 }
 
 
-//
-// listify
-//
-export namespace atma::meta
+///
+/// listify
+///
+export namespace atma::meta::lazy
 {
-	namespace lazy
-	{
-		using listify = cfe<list>;
-	}
-
-	template <typename... Es>
-	using listify = typename lazy::listify::template f<Es...>;
+	using listify = cfe<list>;
 }
 
-//
-// unpack
-//
+export namespace atma::meta
+{
+	template <typename... es>
+	using listify = list<es...>;
+}
+
+
+///
+/// unpack
+/// ---------
+/// 
+/// takes a list as a singular argument, and calls the
+/// continuation with every list element as an argument
+/// 
+///   template <typename... numbers>
+///   using sum = integral_constant_of<(numbers() + ...)>;
+/// 
+///   using list_of_numbers = list<int_<1>, int_<2>, int_<3>, int_<4>>;
+/// 
+///   # equates to int_<10>
+///   invoke<unpack<cfe<sum>, list_of_numbers>
+///
 namespace atma::meta::lazy::detail
 {
 	template <bool front, typename, typename, typename...>
@@ -405,9 +390,33 @@ export namespace atma::meta::lazy
 
 	// order doesn't matter, pick one
 	template <typename C = listify>
-	using unpack = unpack_back<C>;
+	using unpack = unpack_front<C>;
 }
 
+namespace test_unpack
+{
+	using namespace atma::meta;
+
+	template <typename... numbers> using sum = integral_constant_of<(... + numbers())>;
+	template <typename... numbers> using sub = integral_constant_of<(... - numbers())>;
+
+	using list_of_numbers = list<int_<1>, int_<2>, int_<3>, int_<4>>;
+	
+	// unpack (unpack_front)
+	static_assert(std::is_same_v<
+		int_<10>,
+		invoke<lazy::unpack<lazy::cfe<sum>>, list_of_numbers>>);
+
+	// unpack_front
+	static_assert(std::is_same_v<
+		int_<-18>,
+		invoke<lazy::unpack_front<lazy::cfe<sub>>, list_of_numbers, int_<10>>>);
+
+	// unpack_back
+	static_assert(std::is_same_v<
+		int_<0>,
+		invoke<lazy::unpack_back<lazy::cfe<sub>>, list_of_numbers, int_<10>>>);
+}
 
 
 //
@@ -500,7 +509,7 @@ export namespace atma::meta::lazy
 export namespace atma::meta
 {
 	template <typename list, typename x>
-	using list_push_back = invoke<lazy::unpack_back<>, list, x>;
+	using list_push_back = invoke<lazy::unpack_front<>, list, x>;
 }
 
 
@@ -1426,11 +1435,6 @@ struct oper_action<oper<Op, Value>, A>
 template <typename A, typename B>
 using oper_action_t = typename oper_action<A, B>::type;
 
-template <typename...>
-struct no;
-
-
-
 export void test_mythings()
 {
 	using namespace atma;
@@ -1444,8 +1448,8 @@ export void test_mythings()
 		//list<bool_<true>, bool_<false>, bool_<true>, bool_<false>>,
 		int_<14>,
 		invoke<lazy::exec<
-			lazy::map<lazy::cfl<inc>>,
-			lazy::foldl<lazy::cfl<add>>
+			lazy::map<lazy::cfe<inc>>,
+			lazy::foldl<lazy::cfe<add>>
 			//lazy::map<lazy::cfe<not_>>,
 			//lazy::foldl<
 		>, int_<1>, int_<2>, int_<3>, int_<4>>
@@ -1494,14 +1498,15 @@ export void test_mythings()
 		typename lazy::foldl<lazy::cfe<sub>>::template f<uint_<11>, uint_<1>, uint_<2>, uint_<3>, uint_<4>>
 	>);
 
+
 	static_assert(std::is_same_v<
 		uint_<33>,
-		foldr<oper_action_t, uint_<3>, list<oper<sub, uint_<40>>, oper<div, uint_<21>>>>
+		atma::meta::foldr<oper_action_t, uint_<3>, list<oper<sub, uint_<40>>, oper<meta::div, uint_<21>>>>
 	>);
 
 	static_assert(std::is_same_v<
 		uint_<33>,
-		foldr_pack<oper_action_t, oper<sub, uint_<40>>, oper<div, uint_<21>>, uint_<3>>
+		foldr_pack<oper_action_t, oper<sub, uint_<40>>, oper<meta::div, uint_<21>>, uint_<3>>
 	>);
 
 	static_assert(std::is_same_v<invoke<lazy::map<make_unsigned>, int, short, long>, list<unsigned int, unsigned short, unsigned long>>);
@@ -1514,7 +1519,7 @@ export void test_mythings()
 
 	static_assert(std::is_same_v<int, if_<true, int, float>>);
 
-	using first_param_is_signed = lazy::at<usize_<0>, lazy::cfl<std::is_signed>>;
+	using first_param_is_signed = lazy::at<usize_<0>, lazy::cfe<std::is_signed>>;
 	static_assert(std::is_same_v<int, 
 		lazy::cc<lazy::if_<first_param_is_signed, lazy::at<usize_<0>>, lazy::at<usize_<1>>>, int, float>>);
 	//static_assert(std::is_same_v<if_<bool_<true>, int, float>, int>);
