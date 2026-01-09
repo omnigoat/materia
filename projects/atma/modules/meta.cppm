@@ -214,6 +214,78 @@ export namespace atma::meta
 }
 
 
+///
+/// if
+/// 
+namespace atma::meta::lazy::detail
+{
+	template <bool>
+	struct _if_
+	{
+		template <typename tb, typename fb>
+		using f = fb;
+	};
+
+	template <>
+	struct _if_<true>
+	{
+		template <typename tb, typename fb>
+		using f = tb;
+	};
+}
+
+export namespace atma::meta::lazy
+{
+	template <typename predicate, typename tb, typename fb>
+	struct if_
+	{
+		template <typename... args>
+		using f = cc<typename detail::_if_<cc<predicate, args...>::value>
+			::template f<tb, fb>,
+			args...>;
+	};
+}
+
+///
+/// if
+/// 
+namespace atma::meta::lazy::detail
+{
+	template <bool>
+	struct _ift_
+	{
+		template <template <typename...> typename tb, template <typename...> typename fb>
+		template <typename... args>
+		using f = fb<args...>;
+	};
+
+	template <>
+	struct _ift_<true>
+	{
+		template <template <typename...> typename tb, template <typename...> typename fb>
+		template <typename... args>
+		using f = tb<args...>;
+	};
+}
+
+export namespace atma::meta::lazy
+{
+	template <typename predicate, template <typename...> typename tb, template <typename...> typename fb>
+	struct ift_
+	{
+		template <typename... args>
+		using f = dccf<typename detail::_ift_<cc<predicate, args...>::value>
+			::template f<tb, fb>,
+			args...>;
+	};
+}
+
+
+
+
+
+
+
 
 ///
 /// nullptr_v
@@ -362,13 +434,13 @@ namespace atma::meta::lazy::detail
 	template <typename C, typename... Es, typename... Args>
 	struct unpack_impl<true, C, list<Es...>, Args...>
 	{
-		using f = cc<C, Es..., Args...>;
+		using type = cc<C, Es..., Args...>;
 	};
 
 	template <typename C, typename... Es, typename... Args>
 	struct unpack_impl<false, C, list<Es...>, Args...>
 	{
-		using f = cc<C, Args..., Es...>;
+		using type = cc<C, Args..., Es...>;
 	};
 }
 
@@ -378,14 +450,14 @@ export namespace atma::meta::lazy
 	struct unpack_front
 	{
 		template <typename List, typename... Args>
-		using f = typename detail::unpack_impl<true, C, List, Args...>::f;
+		using f = typename detail::unpack_impl<true, C, List, Args...>::type;
 	};
 
 	template <typename C = listify>
 	struct unpack_back
 	{
 		template <typename List, typename... Args>
-		using f = typename detail::unpack_impl<false, C, List, Args...>::f;
+		using f = typename detail::unpack_impl<false, C, List, Args...>::type;
 	};
 
 	// order doesn't matter, pick one
@@ -514,130 +586,100 @@ export namespace atma::meta
 
 
 
-//
-// drop
-//
-#if 0
+
+///
+/// skip
+/// -------
+/// given elements, returns elements without the first N
 namespace atma::meta::lazy::detail
 {
+	constexpr size_t _skip_step_(size_t n, size_t)
+	{
+		return // n > 256 ? 256 : n > 64 ? 64 : 
+			n > 16 ? 16 : n > 8 ? 8 : n > 4 ? 4 : n;
+	}
+
 	template <size_t N, typename C>
-	struct _drop_
+	struct _skip_;
+
+	template <typename C>
+	struct _skip_<0, C>
 	{
-		template <typename Head, typename... Tail>
-		using f = cc<typename _drop_<N - 1, C>::template f<Tail...>>;
+		template <size_t, typename... es>
+		using f = cc<C, es...>;
 	};
 
 	template <typename C>
-	struct _drop_<0, C>
+	struct _skip_<1, C>
 	{
-		template <typename E0, typename...>
-		using f = cc<C, E0>;
+		template <size_t, typename e0, typename... es>
+		using f = cc<C, es...>;
 	};
 
 	template <typename C>
-	struct _drop_<1, C>
+	struct _skip_<2, C>
 	{
-		template <typename E0, typename E1, typename... Elements>
-		using f = cc<C, E1>;
+		template <size_t, typename e0, typename e1, typename... es>
+		using f = cc<C, es...>;
 	};
 
 	template <typename C>
-	struct _drop_<2, C>
+	struct _skip_<3, C>
 	{
-		template <typename E0, typename E1, typename... Elements>
-		using f = cc<C, Elements...>;
+		template <size_t, typename e0, typename e1, typename e2, typename... es>
+		using f = cc<C, es...>;
 	};
 
 	template <typename C>
-	struct _drop_<3, C>
+	struct _skip_<4, C>
 	{
-		template <typename E0, typename E1, typename E2, typename... Elements>
-		using f = cc<C, Elements...>;
+		template <size_t n, typename e0, typename e1, typename e2, typename e3, typename... es>
+		using f = typename _skip_<n - 4, C>::template f<(n - 4), es...>;
+	};
+
+	template <typename C>
+	struct _skip_<8, C>
+	{
+		template <size_t n,
+			typename e0, typename e1, typename e2, typename e3,
+			typename e4, typename e5, typename e6, typename e7,
+			typename... es>
+		using f = typename _skip_<_skip_step_(n - 8), C>::template f<(n - 8), es...>;
+	};
+
+	template <typename C>
+	struct _skip_<16, C>
+	{
+		template <size_t n,
+			typename e0, typename e1, typename e2, typename e3,
+			typename e4, typename e5, typename e6, typename e7,
+			typename e8, typename e9, typename e10, typename e11,
+			typename e12, typename e13, typename e14, typename e15,
+			typename... es>
+		using f = typename _skip_<_skip_step_(n - 16), C>::template f<(n - 16), es...>;
 	};
 }
 
 export namespace atma::meta::lazy
 {
-	template <typename Idx, typename C = identity>
-	struct drop;
-
-	template <std::integral Integral, template <Integral> typename MI, Integral Idx, typename C>
-	struct drop<MI<Idx>, C>
+	template <typename n, typename C = identity>
+	struct skip
 	{
-		template <typename... Elements>
-		using f = typename detail::_drop_<Idx, C>::template f<Elements...>;
+		template <typename... es>
+		using f = typename detail::_skip_<detail::_skip_step_(n::value, sizeof...(es)), C>::template f<n::value, es...>;
 	};
 }
 
 export namespace atma::meta
 {
-	template <size_t N, typename List>
-	using drop = lazy::cc<lazy::unpack<lazy::drop<usize_<N>>>, List>;
+	template <size_t n, typename list>
+	using skip = invoke<lazy::unpack<lazy::skip<usize_<n>>>, list>;
 }
-#endif
 
 
 
 
 
-
-#if 0
-export namespace atma::meta
-{
-	namespace detail
-	{
-		template <int N, typename>
-		struct drop_;
-
-		template <typename List>
-		struct drop_<0, List>
-			{ using type = List; };
-
-		template <int N, typename First, typename... Args>
-		struct drop_<N, list<First, Args...>>
-			{ using type = typename drop_<N - 1, list<Args...>>::type; };
-	}
-
-	namespace detail
-	{
-		template <int N, typename List, typename Result = list<>>
-		struct drop_back_ii_;
-
-		template <typename List, typename Result>
-		struct drop_back_ii_<0, List, Result>
-			{ using type = Result; };
-
-		template <int N, typename First, typename... Args, typename... RArgs>
-		struct drop_back_ii_<N, list<First, Args...>, list<RArgs...>>
-			{ using type = list<RArgs..., First>; };
-
-
-		template <int N, typename List>
-		struct drop_back_;
-
-		template <int N, typename... Args>
-		struct drop_back_<N, list<Args...>>
-		{
-			static_assert(sizeof...(Args) - N >= 0);
-			using type = typename drop_back_ii_<sizeof...(Args) - N, list<Args...>>::type;
-		};
-
-		template <typename List>
-		struct drop_back_<0, List>
-			{ using type = List; };
-
-		template <int N, typename Back, typename... Args>
-		struct drop_back_<N, list<Args..., Back>>
-			{ using type = typename drop_back_<N - 1, list<Args...>>::type; };
-	}
-
-	template <int N, typename list>
-	using drop = typename detail::drop_<N, list>::type;
-
-	template <int N, typename list>
-	using drop_back = typename detail::drop_back_<N, list>::type;
-}
-#endif
 
 // list_size
 export namespace atma::meta::lazy
@@ -915,33 +957,6 @@ export namespace atma::meta
 
 	template <typename List>
 	using any = foldl<or_, bool_<false>, List>;
-}
-
-// if
-namespace atma::meta::lazy::detail
-{
-	template <bool, typename, typename>
-	struct _if_;
-
-	template <typename TC, typename FC>
-	struct _if_<false, TC, FC> : FC
-	{ };
-
-	template <typename TC, typename FC>
-	struct _if_<true, TC, FC> : TC
-	{ };
-}
-
-export namespace atma::meta::lazy
-{
-	template <typename Predicate, typename TC, typename FC>
-	struct if_
-	{
-		template <typename... Args>
-		using f = typename detail::_if_<
-			dcc<Predicate, sizeof...(Args)>::template f<Args...>::value,
-			TC, FC>::template f<Args...>;
-	};
 }
 
 export namespace atma::meta
