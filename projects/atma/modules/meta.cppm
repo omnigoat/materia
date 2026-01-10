@@ -274,7 +274,7 @@ export namespace atma::meta::lazy
 	struct ift_
 	{
 		template <typename... args>
-		using f = dccf<typename detail::_ift_<cc<predicate, args...>::value>
+		using f = dccf<typename detail::_ift_<predicate::value>
 			::template f<tb, fb>,
 			args...>;
 	};
@@ -304,7 +304,7 @@ namespace atma::meta
 /// 
 export namespace atma::meta
 {
-	struct nothing {};
+	struct nil {};
 
 	template <typename...>
 	using void_ = void;
@@ -677,8 +677,16 @@ export namespace atma::meta
 }
 
 
+export namespace atma::meta
+{
+	template <typename A, typename B>
+	struct is_same : false_
+	{};
 
-
+	template <typename T>
+	struct is_same<T, T> : true_
+	{};
+}
 
 
 // list_size

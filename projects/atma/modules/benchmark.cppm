@@ -52,9 +52,11 @@ namespace atma::bench
 {
 	struct param_identity
 	{
-		template <typename payload, typename...>
+		template <typename payload, typename... args>
 		using f = payload;
 	};
+
+
 
 	template <typename payload, typename... args>
 	using param_templated_eager = meta::if_<(sizeof...(args) == 0),
@@ -62,9 +64,20 @@ namespace atma::bench
 
 	struct param_templated
 	{
+		//template <typename payload, typename... args>
+		//using f = meta::invoke<payload, args...>;
+
+//#error why must I use this... :(
 		template <typename payload, typename... args>
-		using f = meta::if_<(sizeof...(args) == 0),
-			payload, meta::invoke<payload, args...>>;
+		using f = typename meta::lazy::if_<meta::lazy::constant<meta::bool_<(sizeof...(args) == 0)>>,
+			meta::lazy::constant<payload>, meta::lazy::dcc<payload, sizeof...(args)>>::template f<args...>; // lazy::at<usize_<0>>, lazy::at<usize_<1>>>, TrueBranch, FalseBranch>
+		
+		
+		//meta::if_<(sizeof...(args) == 0),
+		//	payload, meta::lazy::cc<payload, args...>>;
+
+		//template <typename payload, typename... args>
+		//using f = payload;
 	};
 
 
@@ -76,19 +89,16 @@ namespace atma::bench
 	{
 		constexpr static string_literal name = name.data;
 
+		// constructor takes the payload-type and any gathered
+		// arguments from our axis gatherer
 		using constructor_fn = constructor;
 
 		// the type given to the benchmark
 		using payload_type = payload;
 	};
 
-	template <string_literal name, typename payload>
-	using param = param_t<name, payload>;
-
-
-	// type-param
-	template <string_literal name, typename T>
-	using type_param = param_t<name, T>;
+	template <string_literal name, typename type, typename constructor = param_identity>
+	using param = param_t<name, type, constructor>;
 
 	// templated-param
 	template <string_literal name, template <typename...> typename type, typename constructor = param_templated>
@@ -96,8 +106,7 @@ namespace atma::bench
 
 	// constructed-param
 	template <string_literal name, template <typename...> typename constructor_ft = param_templated_eager>
-	using constructed_param = param_t<name, meta::nothing,
-		meta::lazy::skip<meta::usize_<1>, meta::lazy::cfe<constructor_ft>>>;
+	using constructed_param = param_t<name, meta::nil, meta::lazy::skip<meta::usize_<1>, meta::lazy::cfe<constructor_ft>>>;
 
 	template <typename f, typename... args>
 	using construct_templated_type = meta::invoke<f, args...>;
@@ -126,7 +135,23 @@ namespace atma::bench
 
 
 ///
-/// axis
+/// baked_param
+/// --------------
+/// 
+namespace atma::bench
+{
+	template <string_literal name, typename payload>
+	struct baked_param
+	{
+		constexpr static string_literal name = name.data;
+		using payload_type = payload;
+	};
+}
+
+
+
+///
+/// strings
 /// -------
 /// 
 ///
@@ -150,21 +175,37 @@ namespace atma::bench
 	template <string_literal Name, typename Constructor, typename... Params>
 	struct basic_axis
 	{
-		using constructor_fn = Constructor;
+		using argument_gather_fn = Constructor;
 		using params_type = meta::list<Params...>;
 
 		static constexpr string_literal name = Name.data;
 		static constexpr auto params = meta::list<Params...>{};
 	};
 
-	struct constructor_identity
+	template <typename axes, typename params, typename axis, typename param>
+	using evaluate_parameter = meta::invoke<
+		typename axis::argument_gather_fn,
+		axes, params, axis, param>;
+
+
+	struct gather_nothing
 	{
 		template <typename axes, typename params, typename axis, typename param>
-		using f = param;
+		using f = baked_param<param::name,
+			meta::invoke<typename param::constructor_fn, typename param::payload_type>>;
 	};
 
+#if 0
+	struct constructor_template
+	{
+		template <typename axes, typename params, typename axis, typename param>
+		using f = baked_param<param::name,
+			meta::invoke<typename param::constructor_fn, typename param::payload_type>>;
+	};
+#endif
+
 	template <string_literal Name, typename... Params>
-	using axis = basic_axis<Name, constructor_identity, Params...>;
+	using axis = basic_axis<Name, gather_nothing, Params...>;
 
 	template <string_literal Name, typename Constructor, typename... Params>
 	using templated_axis = basic_axis<Name, Constructor, Params...>;
@@ -197,7 +238,7 @@ namespace atma::bench
 	//};
 
 	template <typename T>
-	using synthesize_param = param_t<"", T>;
+	using synthesize_param = baked_param<"", T>;
 
 	template <typename T>
 	struct relistify<T, std::void_t<decltype(T::payload_type::splat())>>
@@ -211,57 +252,63 @@ namespace atma::bench
 	template <typename... axes>
 	struct construct_from_axes;
 
-	// returns a list containing either a single element - the payload
-	// of the axis. if _splatting_ was asked for, instead returns a list
-	// containing the relistified payloads elements "unwrapped"
-	//template <typename axis, typename axes, typename params>
-	//struct recursively_construct_axis_impl
-	//{ // "constructed" axis
-	//	
-	//};
-	//
-	//template <string_literal Name, typename... AP, typename... Params>
-	//struct recursively_construct_axis_impl<basic_axis<Name, constructor_identity, AP...>, Params...>
-	//{ // "normal" axis
-	//	using f = 
-	//};
+	
 
-	//;
-	//
-	//template <typename... axes, typename param, typename... params>
-	//struct extract_payload<meta::list<axes...>, param, params...>
+	//template <typean
+
+
+
+
+
+
 
 	template <typename T>
 	struct splat: T
-	{
-	};
-
+	{};
 
 	template <typename T>
-	struct param_extractor;
+	struct splattify;
 	
 	template <size_t idx>
-	struct param_extractor<axis_type<idx>>
+	struct splattify<axis_type<idx>>
 	{
 		template <typename constructed_type>
 		using f = meta::list<relistify_t<constructed_type>>;
 	};
 	
 	template <size_t idx>
-	struct param_extractor<splat<axis_type<idx>>>
+	struct splattify<splat<axis_type<idx>>>
 	{
 		template <typename constructed_type>
 		using f = relistify_t<constructed_type>;
 	};
 
+
+	template <typename axes, typename params>
+	struct recursively_construct_axis
+	{
+		template <typename axcd>
+		using axis_constructor_t = 
+			typename meta::at<axcd::value, axes>::argument_gather_fn;
+
+		template <typename axcd>
+		using f = meta::invoke<splattify<axcd>,
+			meta::invoke<axis_constructor_t<axcd>,
+				axes, params,
+				meta::at<axcd::value, axes>,
+				meta::at<axcd::value, params>>>;
+	};
+
+
+#if 0
 	template <typename param>
 	concept valid_param_constructor_concept = requires
 	{
-		{ typename param::constructor_fn{} } -> std::same_as<meta::nothing>; 
+		{ typename param::constructor_fn{} } -> std::same_as<meta::nil>;
 	};
 
 	template <typename axis, typename param>
-	requires !valid_param_constructor_concept<param>
+		requires !valid_param_constructor_concept<param>
 	auto pick_constructor() -> param::constructor_fn;
 
 	template <typename axis, typename param>
@@ -269,20 +316,9 @@ namespace atma::bench
 
 	template <typename axis, typename param>
 	using pick_constructor_t = decltype(pick_constructor<axis, param>());
+#endif // 0
 
-	template <typename axes, typename params>
-	struct recursively_construct_axis
-	{
-		template <typename axcd>
-		using axis_constructor_t = typename meta::at<axcd::value, axes>::constructor_fn;
 
-		template <typename axcd>
-		using f = meta::invoke<param_extractor<axcd>,
-			meta::invoke<axis_constructor_t<axcd>,
-				axes, params,
-				meta::at<axcd::value, axes>,
-				meta::at<axcd::value, params>>>;
-	};
 
 
 
@@ -318,55 +354,67 @@ namespace atma::bench
 	{
 		template <typename candidate>
 		using f = meta::if_<axis::name == candidate::name,
-			meta::nothing,
+			param_t<"<removed>", meta::nil>,
 			candidate>;
 	};
 
-	// call the param's constructor with the param payload,
-	// as well as all collected params from the other axis
-	template <typename Param>
+
+	template <typename Constructor, typename Param>
 	struct lazy_construct_templated_type
 	{
-		template <typename... args>
-		using impl = meta::lazy::cc<
+		template <typename... payloads>
+		using construct_param = meta::lazy::cc<
 			typename Param::constructor_fn,
 			typename Param::payload_type,
-			typename args::payload_type...>;
+			payloads...>;
 
-		template <typename CC, typename... args>
-		using cf = typename CC::template f<impl<args...>>;
+		template <typename... payloads>
+		using construct_with_specified = meta::lazy::cc<
+			Constructor,
+			typename Param::payload_type,
+			payloads...>;
+
+		template <typename... paramvals>
+		using constructor_type = meta::lazy::cc<meta::if_<std::is_same_v<Constructor, meta::nil>,
+			meta::lazy::cfe<construct_param>,
+			meta::lazy::cfe<construct_with_specified>>, typename paramvals::payload_type...>;
+
+		template <typename... paramvals>
+		using impl2 = //decltype(no<Constructor, typename Param::constructor_fn, paramvals...>{});
+			constructor_type<paramvals...>;
+
+#if 0
+
+		//template <typename... paramvals>
+		//using constructor_type = 
+
+			//meta::lazy::cc<what<Constructor, Param>, typename args::payload_type...>>;
+
+		template <typename... paramvals>
+		using impl2 = meta::lazy::cc<constructor_type,
+			typename Param::payload_type,
+			typename paramvals::payload_type...>;
+
+		//template <typename CC, typename... args>
+		//using cf = typename CC::template f<impl2<args...>>;
+
+#endif
 
 		template <typename... args>
-		using f = impl<args...>;
+		using f = impl2<args...>;
 	};
 
 
-
-#if 1
-	template <typename axes, typename axcds, typename params, typename axis, typename param>
+	template <typename constructor, typename axes, typename axcds, typename params, typename axis, typename param>
 	struct construct_with_axes_impl;
 
-	template <typename... axes, typename... axcds, typename params, typename axis, typename param_>
-	struct construct_with_axes_impl<meta::list<axes...>, meta::list<axcds...>, params, axis, param_>
+	template <typename constructor, typename... axes, typename... axcds, typename params, typename axis, typename param_>
+	struct construct_with_axes_impl<constructor, meta::list<axes...>, meta::list<axcds...>, params, axis, param_>
 	{
-		using axes_ = meta::list<axes...>; // meta::invoke<meta::lazy::map<replace_axis_with_nonesuch<axis>>, axes...>;
+		using axes_ = //meta::invoke<meta::lazy::map<replace_axis_with_nonesuch<axis>>, axes...>;
+		             meta::list<axes...>;
 
-		//using what_ = decltype(no<axes_>{});
-
-#if 0
-		using wtype = decltype(no<
-			meta::invoke<
-				meta::lazy::exec
-				<
-					// recursively construct templated axes
-					meta::lazy::map<recursively_construct_axis<axes_, params>>,
-					// flatten into one big list
-					meta::lazy::list_join<>
-				>,
-				axcds...>>{});
-#endif
-
-		using type = param<param_::name,
+		using type = baked_param<param_::name,
 			meta::invoke<
 				meta::lazy::exec
 				<
@@ -375,7 +423,7 @@ namespace atma::bench
 					// flatten into one big list
 					meta::lazy::list_join<>,
 					// construct templated type from list of payloads
-					lazy_construct_templated_type<param_>
+					lazy_construct_templated_type<constructor, param_>
 				>,
 				axcds...>>;
 	};
@@ -384,32 +432,15 @@ namespace atma::bench
 	struct construct_from_axes
 	{
 		template <typename axes_list, typename params_list, typename axis, typename param>
-		using f = typename construct_with_axes_impl<axes_list, meta::list<axes_cds...>, params_list, axis, param>::type;
+		using f = typename construct_with_axes_impl<meta::nil, axes_list, meta::list<axes_cds...>, params_list, axis, param>::type;
 	};
 
-	//template < typename... axes_cds>
-	//struct construct_from_axes_with
-	//{
-	//	template <typename axes_list, typename params_list, typename axis, typename param>
-	//	using f = typename construct_with_axes_impl<axes_list, meta::list<axes_cds...>, params_list, axis, param>::type;
-	//};
-
-#else
-	template <typename... axes_idxs>
-	struct construct_from_axes
+	template <typename constructor, typename... axes_cds>
+	struct construct_from_axes_with
 	{
-		template <typename Param, typename axes_list, typename params_list>
-		using f = param<Param::name,
-			meta::invoke<
-				meta::lazy::exec
-				<
-					meta::lazy::map<extract_payload<list<axes...>, Param, Params...>>,
-					meta::lazy::list_join<>,
-					lazy_construct_type<Param>
-				>,
-				axes_idxs...>>;
+		template <typename axes_list, typename params_list, typename axis, typename param>
+		using f = typename construct_with_axes_impl<constructor, axes_list, meta::list<axes_cds...>, params_list, axis, param>::type;
 	};
-#endif
 }
 
 
@@ -1114,8 +1145,7 @@ namespace atma::bench
 				});
 		}
 
-		template <typename T>
-		using get_constructor_t = typename meta::at<0, T>::constructor_fn;
+		
 
 		auto measure_all() -> scenario_result_t override
 		{
@@ -1124,11 +1154,9 @@ namespace atma::bench
 				([&]<typename... Axes>(meta::list<Axes...>)
 				{
 					this->execute_wrapper<
-						meta::invoke<get_constructor_t<Axes>,
-							axes_type,
-							meta::list<meta::at<1, Axes>...>,
-							meta::at<0, Axes>,
-							meta::at<1, Axes>>...>();
+						evaluate_parameter<axes_type, meta::list<meta::at<1, Axes>...>,
+						meta::at<0, Axes>, meta::at<1, Axes>>...
+					>();
 				}(meta::zip<axes_type, Combos>{}), ...);
 			}(combinations{});
 
@@ -1140,7 +1168,7 @@ namespace atma::bench
 		{
 			current_axes_values.clear();
 
-			//no<axis...> {};
+			//no<params...> {};
 
 			invoke_expand<params...>(
 				[&](auto p) {
@@ -1256,12 +1284,12 @@ ATMA_BENCH_SCENARIO("numbers")
 }
 #endif
 
-#if 0
+#if 1
 namespace test_simple_axis
 {
 	using silliness_axis = atma::bench::axis<"silliness",
-		atma::bench::type_param<"shenanigans", int>,
-		atma::bench::type_param<"tomfoolery", float>>;
+		atma::bench::param<"shenanigans", int>,
+		atma::bench::param<"tomfoolery", float>>;
 
 	ATMA_BENCHMARK_SIMPLE("addition", silliness_axis)
 	{
@@ -1280,12 +1308,12 @@ namespace test_templated_axis
 		atma::bench::templated_param<"std::unordered_map", std::unordered_map>>;
 
 	using key_types_axis = atma::bench::axis<"key-types",
-		atma::bench::type_param<"u64", uint64_t>,
-		atma::bench::type_param<"f32", float>>;
+		atma::bench::param<"u64", uint64_t>,
+		atma::bench::param<"f32", float>>;
 
 	using value_types_axis = atma::bench::axis<"value-types",
-		atma::bench::type_param<"u64", uint64_t>,
-		atma::bench::type_param<"f32", float>>;
+		atma::bench::param<"u64", uint64_t>,
+		atma::bench::param<"f32", float>>;
 
 	ATMA_BENCH_SCENARIO("hash-maps", hash_map_axis, key_types_axis, value_types_axis)
 	{
@@ -1317,20 +1345,20 @@ namespace test_templated_axis_constructed_dynamically
 {
 	namespace abl = atma::bench;
 
-	using hash_map_axis = atma::bench::templated_axis<"hash_map",
+	using hash_map_axis = abl::templated_axis<"hash_map",
 		abl::construct_from_axes<abl::axis2, abl::axis3>,
-		abl::templated_param<"std::map", std::map>,
+		//abl::templated_param<"std::map", std::map>,
 		abl::templated_param<"std::unordered_map", std::unordered_map>>;
 
-	using key_types_axis = atma::bench::axis<"key-types",
-		atma::bench::type_param<"u64", uint64_t>,
-		atma::bench::type_param<"f32", float>,
-		atma::bench::type_param<"string", std::string>>;
+	using key_types_axis = abl::axis<"key-types",
+		abl::param<"u64", uint64_t>,
+		abl::param<"f32", float>,
+		abl::param<"string", std::string>>;
 
-	using value_types_axis = atma::bench::axis<"value-types",
-		atma::bench::type_param<"u64", uint64_t>,
-		atma::bench::type_param<"f32", float>,
-		atma::bench::type_param<"string", std::string>>;
+	using value_types_axis = abl::axis<"value-types",
+		abl::param<"u64", uint64_t>,
+		abl::param<"f32", float>,
+		abl::param<"string", std::string>>;
 
 	ATMA_BENCH_SCENARIO("hash-maps", hash_map_axis, key_types_axis, value_types_axis)
 	{
@@ -1411,6 +1439,9 @@ namespace test_templated_axis_constructed_dynamically_with_splat2
 		ab::construct_from_axes<ab::splat<ab::axis2>, ab::axis3>,
 		ab::constructed_param<"std::map", map_constructor>,
 		ab::constructed_param<"std::unordered_map", unordered_map_constructor>>;
+	//using hash_map_axis = atma::bench::axis<"yeah",
+	//	ab::param<"int", std::map<int, std::string>>>;
+
 
 	using types_axis = atma::bench::axis<"types",
 		atma::bench::key_value_param<"u64|u64", uint64_t, uint64_t>,
@@ -1429,8 +1460,8 @@ namespace test_templated_axis_constructed_dynamically_with_splat2
 	using allocators_axis = ab::templated_axis<"allocators",
 		ab::construct_from_axes<ab::splat<ab::axis2>>,
 		ab::templated_param<"std::allocator", std::allocator, allocator_constructor>,
-		ab::templated_param<"arena_allocator", atma::arena_allocator_t, allocator_constructor>,
-		ab::constructed_param<"aligned_allocator", make_aligned_allocator>>;
+		ab::templated_param<"arena_allocator", atma::arena_allocator_t, allocator_constructor>/*,
+		ab::constructed_param<"aligned_allocator", make_aligned_allocator>*/>;
 
 	ATMA_BENCH_SCENARIO("hash-maps", hash_map_axis, types_axis, allocators_axis)
 	{
