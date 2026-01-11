@@ -214,8 +214,39 @@ export namespace atma::meta
 }
 
 
+
+///
+/// basic types
+/// 
+export namespace atma::meta
+{
+	struct nil {};
+
+	template <typename...>
+	using void_ = void;
+
+	template <auto x>
+	using integral_constant_of = std::integral_constant<decltype(x), x>;
+
+	template <bool         x> using bool_    = integral_constant_of<x>;
+	template <char         x> using char_    = integral_constant_of<x>;
+	template <int          x> using int_     = integral_constant_of<x>;
+	template <unsigned int x> using uint_    = integral_constant_of<x>;
+	template <uint32_t     x> using uint32_  = integral_constant_of<x>;
+	template <uint64_t     x> using uint64_  = integral_constant_of<x>;
+	template <size_t       x> using usize_   = integral_constant_of<x>;
+
+	using false_ = bool_<false>;
+	using true_ = bool_<true>;
+}
+
+
+
+
+
 ///
 /// if
+/// -------
 /// 
 namespace atma::meta::lazy::detail
 {
@@ -240,11 +271,22 @@ export namespace atma::meta::lazy
 	struct if_
 	{
 		template <typename... args>
-		using f = cc<typename detail::_if_<cc<predicate, args...>::value>
-			::template f<tb, fb>,
-			args...>;
+		using impl = typename detail::_if_<cc<predicate, args...>::value>::template f<tb, fb>;
+
+		template <typename... args>
+		using f = cc<impl<args...>, args...>;
+
+		template <typename CC, typename... args>
+		using cf = ccf<impl<args...>, CC, args...>;
 	};
 }
+
+export namespace atma::meta
+{
+	template <bool predicate, typename tb, typename fb>
+	using if_ = typename lazy::detail::_if_<predicate>::template f<tb, fb>;
+}
+
 
 ///
 /// if
@@ -297,32 +339,6 @@ namespace atma::meta
 	inline constexpr T* nullptr_v = nullptr;
 }
 #endif
-
-
-///
-/// basic types
-/// 
-export namespace atma::meta
-{
-	struct nil {};
-
-	template <typename...>
-	using void_ = void;
-
-	template <auto x>
-	using integral_constant_of = std::integral_constant<decltype(x), x>;
-
-	template <bool         x> using bool_    = integral_constant_of<x>;
-	template <char         x> using char_    = integral_constant_of<x>;
-	template <int          x> using int_     = integral_constant_of<x>;
-	template <unsigned int x> using uint_    = integral_constant_of<x>;
-	template <uint32_t     x> using uint32_  = integral_constant_of<x>;
-	template <uint64_t     x> using uint64_  = integral_constant_of<x>;
-	template <size_t       x> using usize_   = integral_constant_of<x>;
-
-	using false_ = bool_<false>;
-	using true_ = bool_<true>;
-}
 
 
 ///
@@ -967,18 +983,7 @@ export namespace atma::meta
 	using any = foldl<or_, bool_<false>, List>;
 }
 
-export namespace atma::meta
-{
-	template <bool C>
-	struct is_true
-	{
-		template <typename...>
-		using f = bool_<C>;
-	};
 
-	template <bool Condition, typename TrueBranch, typename FalseBranch>
-	using if_ = lazy::cc<lazy::if_<is_true<Condition>, lazy::at<usize_<0>>, lazy::at<usize_<1>>>, TrueBranch, FalseBranch>;
-}
 
 // map
 export namespace atma::meta::lazy
