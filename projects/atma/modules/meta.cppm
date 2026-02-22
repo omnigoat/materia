@@ -481,6 +481,7 @@ export namespace atma::meta
 }
 
 
+
 ///
 /// unpack
 /// ---------
@@ -702,12 +703,36 @@ export namespace atma::meta
 
 
 
-//
-// at
-// ----
-// 
-// gets the argument at index N
-//
+///
+/// list_size
+/// -----------
+/// 
+export namespace atma::meta::lazy
+{
+	template <typename C = identity>
+	struct list_size
+	{
+		template <typename... es>
+		using f = usize_<sizeof...(es)>;
+
+		template <typename CC, typename... es>
+		using cf = cc<CC, usize_<sizeof...(es)>>;
+	};
+}
+
+export namespace atma::meta
+{
+	template <typename List>
+	inline constexpr size_t list_size_v = lazy::cc<lazy::unpack<lazy::list_size<>>, List>::value;
+}
+
+
+
+///
+/// at
+/// ----
+/// gets the argument at index N
+///
 export namespace atma::meta::lazy
 {
 	template <typename N, typename C = identity>
@@ -743,12 +768,18 @@ export namespace atma::meta::lazy
 
 
 ///
-/// list_push_back
+/// list_push_back / list_push_front
+/// -------------------------------------
 /// 
 export namespace atma::meta::lazy
 {
 	template <typename C = listify>
 	struct list_push_back
+		: unpack_front<C>
+	{};
+
+	template <typename C = listify>
+	struct list_push_front
 		: unpack_back<C>
 	{};
 }
@@ -756,27 +787,12 @@ export namespace atma::meta::lazy
 export namespace atma::meta
 {
 	template <typename list, typename x>
-	using list_push_back = invoke<lazy::unpack_front<>, list, x>;
+	using list_push_back = invoke<lazy::list_push_back<>, list, x>;
+
+	template <typename list, typename x>
+	using list_push_front = invoke<lazy::list_push_front<>, list, x>;
 }
 
-
-
-// list_size
-export namespace atma::meta::lazy
-{
-	template <typename C = identity>
-	struct list_size
-	{
-		template <typename... es>
-		using f = usize_<sizeof...(es)>;
-	};
-}
-
-export namespace atma::meta
-{
-	template <typename List>
-	inline constexpr size_t list_size_v = lazy::cc<lazy::unpack<lazy::list_size<>>, List>::value;
-}
 
 
 

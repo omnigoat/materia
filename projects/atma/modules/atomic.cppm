@@ -220,9 +220,9 @@ namespace atma::detail
 //
 namespace atma::detail
 {
-	template <std::integral Integral, class SourceType>
-	[[nodiscard]] Integral atomic_reinterpret_cast(SourceType const& source) noexcept
+	template <std::integral Integral, typename SourceType>
 	requires (sizeof(Integral) == sizeof(SourceType))
+	[[nodiscard]] Integral atomic_reinterpret_cast(SourceType const& source) noexcept
 	{
 		if constexpr (std::is_integral_v<SourceType>)
 		{
@@ -305,8 +305,8 @@ namespace atma::detail
 		inline static constexpr bool is_64_bit = byte_width == 8;
 
 		template <typename... Addresses>
+		requires (std::is_pointer_v<Addresses> && ...)
 		static bool validate_addresses(Addresses... addresses)
-			requires (std::is_pointer_v<Addresses> && ...)
 		{
 			// a) check the type we're pointing to is 16-bits
 			// b) check each address is 'Bytewdith' aligned

@@ -3,7 +3,7 @@ module;
 #include <cstdint>
 #include <type_traits>
 #include <memory>
-
+#include <string>
 
 export module atma.types;
 
@@ -19,21 +19,21 @@ export using uint   = unsigned int;
 export using ulong  = unsigned long;
 export using ullong = unsigned long long;
 
-export using int8  = int8_t;
-export using int16 = int16_t;
-export using int32 = int32_t;
-export using int64 = int64_t;
+export using int8   = int8_t;
+export using int16  = int16_t;
+export using int32  = int32_t;
+export using int64  = int64_t;
+export using intptr =  intptr_t;
 
-export using uint8  = uint8_t;
-export using uint16 = uint16_t;
-export using uint32 = uint32_t;
-export using uint64 = uint64_t;
-
-export using  intptr =  intptr_t;
+export using uint8   = uint8_t;
+export using uint16  = uint16_t;
+export using uint32  = uint32_t;
+export using uint64  = uint64_t;
 export using uintptr = uintptr_t;
 
 export using byte = std::byte;
 
+export using ptrdiff_t = std::ptrdiff_t;
 export using size_t = std::size_t;
 
 
@@ -70,6 +70,46 @@ export namespace atma
 {
 	template <size_t... Idxs>
 	using idxs_t = std::index_sequence<Idxs...>;
+}
+
+///
+/// string_literal
+/// ----------------
+/// 
+export namespace atma::bench
+{
+	template <size_t N>
+	struct string_literal
+	{
+		constexpr string_literal(string_literal const& rhs)
+		{
+			std::copy_n(rhs.data, N, data);
+		}
+
+		constexpr string_literal(char const (&str)[N])
+		{
+			std::copy_n(str, N, data);
+		}
+
+		template <size_t L, size_t R>
+		requires (L + R <= N)
+		constexpr string_literal(char const (&lhs)[L], char const (&rhs)[R])
+		{
+			std::copy_n(lhs, L, data);
+			std::copy_n(rhs, R, data + L);
+		}
+
+		template <size_t M>
+		constexpr string_literal<N + M> push_back(char const (&str)[M]) const
+		{
+			return string_literal<N + M>{data, str};
+		}
+
+		constexpr operator char const*() const { return data; }
+		constexpr operator std::string() const { return {data}; }
+
+		char data[N];
+	};
 }
 
 
@@ -221,9 +261,10 @@ export namespace atma
 	constexpr bool is_implicitly_default_constructible_v = detail::is_implicitly_default_constructible_impl<T>::value;
 }
 
-//
-//
-//
+///
+/// actually_false_v
+/// ------------------
+///
 export namespace atma
 {
 	template <typename T>

@@ -605,9 +605,9 @@ namespace atma
 		// how dumb is that? the method that takes a statically-sized array is
 		// obviously a better fit, regardless of if it's templated. sigh.
 		//
-		template <typename Y>
+		template <std::same_as<T*> Y>
+		requires std::is_empty_v<allocator_type>
 		constexpr memxfer_t(Y ptr)
-		requires std::is_empty_v<allocator_type> && std::is_same_v<Y, T*>
 			: alloc_and_ptr_(allocator_type(), ptr)
 		{}
 

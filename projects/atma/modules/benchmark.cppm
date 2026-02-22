@@ -28,44 +28,6 @@ export module atma.benchmark;
 import atma.types;
 import atma.aligned_allocator;
 
-export namespace atma::bench
-{
-	template <size_t N>
-	struct string_literal
-	{
-		constexpr string_literal(string_literal const& rhs)
-		{
-			std::copy_n(rhs.data, N, data);
-		}
-
-		constexpr string_literal(char const (&str)[N])
-		{
-			std::copy_n(str, N, data);
-		}
-
-		template <size_t L, size_t R>
-		requires (L + R <= N)
-		constexpr string_literal(char const (&lhs)[L], char const (&rhs)[R])
-		{
-			std::copy_n(lhs, L, data);
-			std::copy_n(rhs, R, data + L);
-		}
-
-		template <size_t M>
-		constexpr string_literal<N + M> push_back(char const (&str)[M]) const
-		{
-			return string_literal<N + M>{data, str};
-		}
-
-		constexpr operator char const*() const { return data; }
-		constexpr operator std::string() const { return {data}; }
-		char data[N];
-	};
-
-	template <typename...>
-	struct no;
-}
-
 
 namespace atma::bench
 {
