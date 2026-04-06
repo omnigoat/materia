@@ -1,10 +1,11 @@
 module;
 
-#include <atma/functor.hpp>
-
-#include <atomic>
 #include <bit>
 #include <memory>
+#include <atomic>
+#include <string>
+
+#include <atma/functor.hpp>
 
 export module atma.intrusive_ptr;
 

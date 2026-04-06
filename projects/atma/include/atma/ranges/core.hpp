@@ -1,9 +1,9 @@
 #pragma once
 
-#include <atma/assert.hpp>
-
 #include <functional>
 #include <ranges>
+
+#include <atma/assert.hpp>
 
 import atma.types;
 

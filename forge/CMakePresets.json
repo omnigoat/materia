@@ -1,0 +1,29 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "windows-csharp",
+      "displayName": "C# Windows x64",
+      "description": "Targeting .NET SDK-style projects on Windows",
+      "generator": "Visual Studio 18 2026",
+      "binaryDir": "${sourceDir}/.out/build/${presetName}",
+      "architecture": "x64",
+      "cacheVariables": {
+        "CMAKE_DOTNET_SDK": "Microsoft.NET.Sdk",
+        "CMAKE_DOTNET_TARGET_FRAMEWORK": "net10.0"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "release",
+      "configurePreset": "windows-csharp",
+      "configuration": "Release"
+    },
+    {
+      "name": "development",
+      "configurePreset": "windows-csharp",
+      "configuration": "Debug"
+    }
+  ]
+}

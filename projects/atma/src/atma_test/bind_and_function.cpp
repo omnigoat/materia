@@ -1,11 +1,11 @@
-#include <atma/unit_test.hpp>
+//#include <functional>
+//#include <type_traits>
 
+#include <atma/unit_test.hpp>
 #include <atma/function.hpp>
 #include <atma/thread/engine.hpp>
 
-#include <functional>
-#include <type_traits>
-
+import std;
 import atma.bind;
 
 int mul(int a, int b) { return a * b; }

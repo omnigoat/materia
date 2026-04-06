@@ -6,10 +6,9 @@ module;
 // for _ReadWriteBarrier()
 #include <winnt.h>
 
-#include <atomic>
-
 export module atma.atomic;
 
+import std.compat;
 import atma.types;
 
 //
@@ -331,7 +330,7 @@ namespace atma::detail
 
 			if constexpr (known_seq_cst)
 			{
-				_Compiler_barrier();
+				_ReadWriteBarrier();
 			}
 			else switch (order)
 			{
@@ -340,7 +339,7 @@ namespace atma::detail
 				case memory_order::consume:
 				case memory_order::acquire:
 				case memory_order::seq_cst:
-					_Compiler_barrier();
+					_ReadWriteBarrier();
 					break;
 				case memory_order::release:
 				case memory_order::acq_rel:
@@ -375,7 +374,7 @@ namespace atma::detail
 			{
 				case memory_order::release:
 				{
-					_Compiler_barrier();
+					_ReadWriteBarrier();
 					[[fallthrough]];
 				}
 

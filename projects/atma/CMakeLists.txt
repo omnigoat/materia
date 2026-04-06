@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.31)
 
 add_library(atma STATIC)
 
+add_compile_options(/lmaoz)
+
 # compile options
 target_compile_options(atma PUBLIC ${MATERIA_CPP_FLAGS})
 
@@ -106,6 +108,8 @@ target_sources(atma PUBLIC
 #
 add_executable(atma_test)
 
+set_target_properties(atma_test PROPERTIES VS_GLOBAL_BuildStdModules  "false")
+
 target_sources(atma_test PRIVATE
 	src/atma_test/bind_and_function.cpp
 	src/atma_test/entrypoint.cpp
@@ -121,3 +125,5 @@ target_sources(atma_test PRIVATE
 	src/atma_test/test_vector.cpp)
 
 target_link_libraries(atma_test PUBLIC atma)
+
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT atma_test)

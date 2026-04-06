@@ -1,5 +1,5 @@
 using System.CommandLine;
-using System.Linq;
+using Microsoft.CodeAnalysis;
 
 namespace Mantle;
 
@@ -69,7 +69,7 @@ public class Mantle
 			var config = pr.GetValue<string>("config") ?? "";
 			var ide = pr.GetValue<string>("ide") ?? "";
 
-			Commands.Gen(pr, target, arch, config, ide);
+			Commands.Gen.Execute(pr, target, arch, config, ide);
 		});
 
 		Command setvar = new("set-default")
@@ -103,6 +103,12 @@ public class Mantle
 
 		ParseResult pr = r.Parse(args);
 		pr.Invoke();
+
+		if (System.Diagnostics.Debugger.IsAttached)
+		{
+			Console.WriteLine("Press any key to continue...");
+			Console.ReadLine();
+		}
 
 		return 0;
 		//return Dyncom.Execute();

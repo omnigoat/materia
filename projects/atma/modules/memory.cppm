@@ -1,14 +1,14 @@
 module;
 
+#include <type_traits>
+#include <vector>
+#include <memory>
+
+#include <atma/ranges/core.hpp>
 #include <atma/ebo_pair.hpp>
 #include <atma/functor.hpp>
 #include <atma/assert.hpp>
 
-#include <atma/ranges/core.hpp>
-
-#include <type_traits>
-#include <vector>
-#include <memory>
 
 export module atma.memory;
 

@@ -2,10 +2,10 @@ module;
 
 #include <atma/assert.hpp>
 #include <atma/config/platform.hpp>
-#include <initializer_list>
 
 export module atma.vector;
 
+import std;
 import atma.types;
 import atma.aligned_allocator;
 import atma.memory;

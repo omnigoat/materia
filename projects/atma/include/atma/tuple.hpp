@@ -1,8 +1,6 @@
 #pragma once
 
-#include <tuple>
-#include <cstdint>
-
+import std;
 import atma.types;
 
 

@@ -1,17 +1,20 @@
 cmake_minimum_required(VERSION 3.31)
 
-set(CMAKE_CXX_STANDARD 20)
+# ignore these variables set for dev purposes
+set(ignore "${CMAKE_SUPPRESS_DEVELOPER_WARNINGS}${CMAKE_C_COMPILER}")
 
-project(materia)
+# set global language standard
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_MODULE_STD 1)
+set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(MATERIA_CPP_FLAGS
-	$<$<CXX_COMPILER_ID:MSVC>:/Zc:preprocessor>)
+# materia umbrella project
+project(materia LANGUAGES CXX)
 
-add_subdirectory(projects/doctest doctest)
-add_subdirectory(projects/boost boost)
-add_subdirectory(projects/atma atma)
-add_subdirectory(projects/rose rose)
+# msvc-specific settings
+set(MATERIA_CPP_FLAGS $<$<CXX_COMPILER_ID:MSVC>:/Zc:preprocessor>)
 
-set_property(
-	DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	PROPERTY VS_STARTUP_PROJECT rose)
+# include projects
+add_subdirectory(projects)

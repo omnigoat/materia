@@ -751,13 +751,6 @@ namespace atma { namespace unit_test {
 // add some additional "doctest" macros
 //
 #define DOCTEST_SCENARIO_OF(suite_name, name) DOCTEST_TEST_CASE("  Scenario: " name * ::doctest::test_suite(suite_name))
-#define DOCTEST_AND_GIVEN(name) DOCTEST_SUBCASE("And Given: " name)
-
-#if !defined(DOCTEST_CONFIG_NO_SHORT_MACRO_NAMES)
-#define SCENARIO_OF DOCTEST_SCENARIO_OF
-#define AND_GIVEN DOCTEST_AND_GIVEN
-#endif
-
 
 #define CHECK_CANARY_SCOPE(name, ...) \
 	CHECK(::atma::unit_test::canary_t::event_log_matches(name, {__VA_ARGS__}))

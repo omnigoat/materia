@@ -1,10 +1,10 @@
 module;
 
 #include <atma/platform/allocation.hpp>
-#include <exception>
 
 export module atma.aligned_allocator;
 
+import std;
 import atma.types;
 
 export namespace atma

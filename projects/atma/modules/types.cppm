@@ -1,12 +1,8 @@
 module;
 
-#include <cstdint>
-#include <type_traits>
-#include <memory>
-#include <string>
-
 export module atma.types;
 
+import std.compat;
 
 //
 // fundamental integral types
@@ -557,4 +553,20 @@ export namespace atma
 
 	template <typename To, template <typename...> typename Op, typename... Args>
 	constexpr inline bool is_detected_convertible_v = is_detected_convertible<To, Op, Args...>::value;
+}
+
+
+///
+/// what_is
+/// ----------
+/// prints out the type in the debugger
+/// 
+/// use:
+/// 
+///    what_is<some_type>; // don't actually make a variable
+/// 
+export namespace atma
+{
+	template <typename...>
+	struct what_is;
 }

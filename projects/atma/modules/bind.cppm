@@ -1,11 +1,13 @@
 module;
 
+#include <type_traits>
+#include <functional>
+#include <tuple>
+
 #include <atma/tuple.hpp>
 #include <atma/function_composition.hpp>
 
-#include <type_traits>
-#include <tuple>
-#include <functional>
+
 
 export module atma.bind;
 

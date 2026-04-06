@@ -2,12 +2,6 @@ module;
 
 #include <atma/benchmark.hpp>
 
-#include <string>
-#include <chrono>
-
-#include <ranges>
-
-
 #  define WIN32_LEAN_AND_MEAN
 #  include <Windows.h>
 #  include <xmmintrin.h>
@@ -25,6 +19,7 @@ module;
 
 export module atma.benchmark;
 
+import std;
 import atma.types;
 import atma.aligned_allocator;
 
