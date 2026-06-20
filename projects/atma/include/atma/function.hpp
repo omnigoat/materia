@@ -4,11 +4,8 @@
 #include <atma/function_composition.hpp>
 #include <atma/assert.hpp>
 
-//#include <tuple>
-//#include <functional>
-
-import std;
-import atma.bind;
+#include <tuple>
+#include <functional>
 
 // where we store the functor if we can't SFO
 namespace atma

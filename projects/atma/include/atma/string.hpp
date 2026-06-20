@@ -2,12 +2,7 @@
 
 #include <atma/utf/utf8_string.hpp>
 
-#include <atma/streams.hpp>
-
 #include <algorithm>
-
-import atma.vector;
-
 
 namespace atma {
 
@@ -17,7 +12,7 @@ namespace atma {
 
 
 
-
+#if 0
 
 	struct string_encoder_t
 	{
@@ -145,6 +140,6 @@ namespace atma {
 		return r;
 	}
 
-
+#endif
 
 }

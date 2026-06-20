@@ -8,7 +8,7 @@
 #include <boost/preprocessor/variadic/size.hpp>
 #include <boost/preprocessor/variadic/to_tuple.hpp>
 
-import std;
+#include <source_location>
 
 #ifdef ATMA_PLATFORM_WINDOWS
 #	define ATMA_DEBUGBREAK() __debugbreak()

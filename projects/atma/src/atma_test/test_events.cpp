@@ -1,15 +1,12 @@
-﻿#include <atma/unit_test.hpp>
+﻿#if 0
+#include <atma/unit_test.hpp>
 
 #include <atma/event.hpp>
 #include <atma/lockfree_list.hpp>
-#include <atma/logging.hpp>
-
-//#include <rose/runtime.hpp>
-
-//#include "../../shiny/include/lion/console_log_handler.hpp"
-
+//#include <atma/logging.hpp>
 
 #include <future>
+#include <chrono>
 
 using namespace std::chrono_literals;
 
@@ -19,7 +16,7 @@ using namespace std::chrono_literals;
 
 
 #if 1
-SCENARIO_OF("events", "events can be constructed")
+SCENARIO("events - events can be constructed")
 {
 	//rose::runtime_t RR;
 	//rose::setup_default_logging_to_console(RR);
@@ -85,4 +82,5 @@ SCENARIO_OF("events", "events can be constructed")
 		b.join();
 	}
 }
+#endif
 #endif

@@ -1,10 +1,9 @@
 #pragma once
 
 #include <atma/math/constants.hpp>
+#include <atma/types.hpp>
 
 #include <cmath>
-
-import atma.types;
 
 
 namespace atma { namespace math {

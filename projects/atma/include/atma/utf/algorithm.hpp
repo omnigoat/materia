@@ -1,12 +1,11 @@
 #pragma once
-//=====================================================================
+
 #include <atma/utf/utf8_char.hpp>
 #include <atma/assert.hpp>
-import atma.types;
-//=====================================================================
-namespace atma {
-//=====================================================================
-	
+#include <atma/types.hpp>
+
+namespace atma
+{
 	template <typename OT, typename IT>
 	inline OT utf16_from_utf8(OT dest, IT begin, IT end)
 	{
@@ -55,9 +54,4 @@ namespace atma {
 
 		return dest;
 	}
-
-
-
-//=====================================================================
-} // namespace atma
-//=====================================================================
+}

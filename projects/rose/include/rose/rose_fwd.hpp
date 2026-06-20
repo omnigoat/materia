@@ -1,8 +1,7 @@
 #pragma once
 
 #include <atma/bitmask.hpp>
-
-import atma.types;
+#include <atma/types.hpp>
 
 namespace rose
 {

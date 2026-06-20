@@ -2,8 +2,6 @@
 
 #include <atma/config/platform.hpp>
 
-import atma.types;
-
 namespace atma { namespace platform {
 
 	inline auto allocate_aligned_memory(size_t align, size_t size) -> void*

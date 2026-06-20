@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atma/config/platform.hpp>
+#include <string>
 
 // string
 namespace atma::platform_interop
@@ -14,18 +15,21 @@ namespace atma::platform_interop
 namespace atma::platform_interop
 {
 #if defined(ATMA_PLATFORM_WINDOWS)
-	inline auto make_platform_string(char const* str) -> std::unique_ptr<wchar_t[]>
+	inline auto make_platform_string(char const* str) -> std::wstring
 	{
 		int char16s = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str, -1, nullptr, 0);
-		wchar_t* wstr = new wchar_t[char16s];
-		int r = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str, -1, wstr, char16s);
+		//wchar_t* wstr = new wchar_t[char16s];
+		std::wstring wstr;
+		wstr.resize(char16s);
+		int r = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str, -1, wstr.data(), char16s);
 
-		if (r == 0) {
-			delete wstr;
-			return std::unique_ptr<wchar_t[]>{};
+		if (r == 0)
+		{
+			return {};
 		}
-		else {
-			return std::unique_ptr<wchar_t[]>{wstr};
+		else
+		{
+			return std::move(wstr);
 		}
 	}
 #endif

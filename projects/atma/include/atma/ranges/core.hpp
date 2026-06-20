@@ -1,11 +1,10 @@
 #pragma once
 
+#include <atma/assert.hpp>
+#include <atma/types.hpp>
+
 #include <functional>
 #include <ranges>
-
-#include <atma/assert.hpp>
-
-import atma.types;
 
 // range
 namespace atma

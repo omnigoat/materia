@@ -12,8 +12,7 @@
 
 #include <intrin.h>
 
-import atma.meta;
-
+//import atma.meta;
 
 
 

@@ -3,13 +3,10 @@
 #include "hash.hpp"
 #include "math/functions.hpp"
 #include <atma/assert.hpp>
+#include <atma/types.hpp>
 
 #include <functional>
 #include <array>
-
-import atma.memory;
-import atma.types;
-import atma.meta;
 
 #if USE_SPP_HASH_MAP
 

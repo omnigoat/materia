@@ -1,7 +1,6 @@
 #pragma once
 
 #include <atma/lockfree/queue.hpp>
-#include <atma/lockfree_queue.hpp>
 #include <atma/function.hpp>
 
 #include <vector>

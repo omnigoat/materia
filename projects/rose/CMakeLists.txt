@@ -11,18 +11,33 @@ target_link_libraries(rose PUBLIC atma)
 # include directories
 target_include_directories(rose
 	PUBLIC include)
+	
+# common
+target_sources(rose PUBLIC
+	FILE_SET modules
+	TYPE CXX_MODULES
+	FILES
+		src/rose.cppm
+		src/@common/runtime.cppm
+		src/@common/console.cppm
+		src/@common/file.cppm
+		src/@common/path.cppm
+		src/@common/mmap.cppm)
+
+# windows
+target_sources(rose PUBLIC
+	FILE_SET modules
+	TYPE CXX_MODULES
+	FILES 
+		src/windows/console.cppm
+		src/windows/file.cppm
+		src/windows/mmap.cppm
+		src/windows/runtime.cppm)
+
 
 # sources
 target_sources(rose
 	PUBLIC
-		include/rose/console.hpp
-		include/rose/file.hpp
-		include/rose/mmap.hpp
-		include/rose/path.hpp
-		include/rose/rose_fwd.hpp
-		include/rose/runtime.hpp
-	PRIVATE
-		src/runtime.cpp
-		src/windows/console.cpp
-		src/windows/file.cpp
-		src/windows/mmap.cpp)
+		include/rose/rose_fwd.hpp)
+
+

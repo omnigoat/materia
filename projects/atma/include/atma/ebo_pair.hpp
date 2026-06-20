@@ -1,8 +1,9 @@
 #pragma once
 
+#include <atma/types.hpp>
+
 #include <type_traits>
 
-import atma.types;
 
 // ebo-pair
 namespace atma::detail

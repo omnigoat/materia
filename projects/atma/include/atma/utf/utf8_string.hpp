@@ -1,10 +1,11 @@
 #pragma once
 
 #include <atma/assert.hpp>
-import atma.types;
+#include <atma/types.hpp>
 
 #include <type_traits>
 #include <span>
+#include <ostream>
 
 //=====================================================================
 //
@@ -478,6 +479,12 @@ namespace atma
 
 		auto operator = (utf8_string_t const&) -> utf8_string_t&;
 		auto operator = (utf8_string_t&&) -> utf8_string_t&;
+		
+		bool operator == (utf8_string_t const&) const;
+		bool operator == (char const*) const;
+		auto operator <=> (utf8_string_t const&) const -> std::strong_ordering;
+		auto operator <=> (char const*) const -> std::strong_ordering;
+
 		auto operator += (utf8_string_t const& rhs) -> utf8_string_t&;
 		auto operator += (char const*) -> utf8_string_t&;
 
@@ -525,14 +532,6 @@ namespace atma
 		friend class utf16_string_t;
 	};
 
-
-	auto operator == (utf8_string_t const&, utf8_string_t const&) -> bool;
-	auto operator == (utf8_string_t const&, char const*) -> bool;
-	auto operator == (char const*, utf8_string_t const&) -> bool;
-
-	auto operator != (utf8_string_t const&, utf8_string_t const&) -> bool;
-	auto operator != (utf8_string_t const&, char const*) -> bool;
-	auto operator != (char const*, utf8_string_t const&) -> bool;
 
 	auto operator + (utf8_string_t const&, utf8_string_t const&)       -> utf8_string_t;
 	auto operator + (utf8_string_t const&, char const*)                -> utf8_string_t;
@@ -916,6 +915,37 @@ namespace atma
 		return *this;
 	}
 
+	inline bool utf8_string_t::operator == (utf8_string_t const& rhs) const
+	{
+		return size_bytes() == rhs.size_bytes() && 
+			::strncmp(data(), rhs.data(), size_bytes()) == 0;
+	}
+
+	inline bool utf8_string_t::operator == (char const* rhs) const
+	{
+		return ::strcmp(data(), rhs) == 0;
+	}
+	
+	inline std::strong_ordering utf8_string_t::operator <=> (utf8_string_t const& rhs) const
+	{
+		if (auto r = ::strcmp(c_str(), rhs.c_str()); r < 0)
+			return std::strong_ordering::less;
+		else if (r > 0)
+			return std::strong_ordering::greater;
+		else
+			return std::strong_ordering::equal;
+	}
+
+	inline std::strong_ordering utf8_string_t::operator <=> (char const* rhs) const
+	{
+		if (auto r = ::strcmp(c_str(), rhs); r < 0)
+			return std::strong_ordering::less;
+		else if (r > 0)
+			return std::strong_ordering::greater;
+		else
+			return std::strong_ordering::equal;
+	}
+
 	inline auto utf8_string_t::empty() const -> bool
 	{
 		return size_ == 0;
@@ -1072,25 +1102,25 @@ namespace atma
 	//=====================================================================
 	// operators
 	//=====================================================================
-	inline auto operator == (utf8_string_t const& lhs, utf8_string_t const& rhs) -> bool
-	{
-		return lhs.size_bytes() == rhs.size_bytes() && ::memcmp(lhs.raw_begin(), rhs.raw_begin(), lhs.size_bytes()) == 0;
-	}
+	//inline auto operator == (utf8_string_t const& lhs, utf8_string_t const& rhs) -> bool
+	//{
+	//	return lhs.size_bytes() == rhs.size_bytes() && ::memcmp(lhs.raw_begin(), rhs.raw_begin(), lhs.size_bytes()) == 0;
+	//}
+	//
+	//inline auto operator != (utf8_string_t const& lhs, utf8_string_t const& rhs) -> bool
+	//{
+	//	return !operator == (lhs, rhs);
+	//}
+	//
+	//inline auto operator == (utf8_string_t const& lhs, char const* rhs) -> bool
+	//{
+	//	return ::strcmp(lhs.raw_begin(), rhs) == 0;
+	//}
 
-	inline auto operator != (utf8_string_t const& lhs, utf8_string_t const& rhs) -> bool
-	{
-		return !operator == (lhs, rhs);
-	}
-
-	inline auto operator == (utf8_string_t const& lhs, char const* rhs) -> bool
-	{
-		return ::strcmp(lhs.raw_begin(), rhs) == 0;
-	}
-
-	inline auto operator < (utf8_string_t const& lhs, utf8_string_t const& rhs) -> bool
-	{
-		return std::lexicographical_compare(lhs.raw_begin(), lhs.raw_end(), rhs.raw_begin(), rhs.raw_end());
-	}
+	//inline auto operator < (utf8_string_t const& lhs, utf8_string_t const& rhs) -> bool
+	//{
+	//	return std::lexicographical_compare(lhs.raw_begin(), lhs.raw_end(), rhs.raw_begin(), rhs.raw_end());
+	//}
 
 	inline auto operator + (utf8_string_t const& lhs, utf8_string_t const& rhs) -> utf8_string_t
 	{

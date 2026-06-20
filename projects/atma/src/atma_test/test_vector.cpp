@@ -2,13 +2,13 @@
 #include <atma/unit_test.hpp>
 #include <atma/algorithm.hpp>
 
-import atma.vector;
-import atma.memory;
+
+import atma;
 
 using canary_t = atma::unit_test::canary_t;
 
 
-SCENARIO_OF("vector", "vectors can be constructed")
+SCENARIO("vector - construction")
 {
 	GIVEN("a default-constructed vector")
 	{
@@ -216,7 +216,7 @@ SCENARIO_OF("vector", "vectors can be constructed")
 
 }
 
-SCENARIO_OF("vector", "vectors can be inserted into")
+SCENARIO("vector - insertion")
 {
 	GIVEN("a vector constructed with {1, 2, 3, 4}")
 	{
@@ -255,7 +255,7 @@ SCENARIO_OF("vector", "vectors can be inserted into")
 }
 
 
-SCENARIO_OF("vector", "vectors can be sized and resized")
+SCENARIO("vector - sizing & resizing")
 {
 	GIVEN("an empty vector")
 	{
@@ -299,7 +299,7 @@ SCENARIO_OF("vector", "vectors can be sized and resized")
 	}
 }
 
-SCENARIO_OF("vector", "vectors can be assigned")
+SCENARIO("vector - assignment")
 {
 	GIVEN("an empty vector 'v' and vector 'v2'={1,2,3,4}")
 	{
@@ -338,7 +338,7 @@ SCENARIO_OF("vector", "vectors can be assigned")
 }
 
 
-SCENARIO_OF("vector", "vector::insert is called")
+SCENARIO("vector - range insertion")
 {
 	GIVEN("an empty vector 'v' and vector 'v2'={1,2,3,4}")
 	{
@@ -358,19 +358,16 @@ SCENARIO_OF("vector", "vector::insert is called")
 		}
 	}
 
-	GIVEN("an empty vector 'v' and vector 'v2'={'henry', 'theodore', 'marcie', 'rachael'}")
+	GIVEN("a vector v={'timothy', 'maria'} and vector v2={'henry', 'theodore', 'marcie', 'rachael'}")
 	{
 		atma::vector<std::string> v{"timothy", "maria"};
 		atma::vector<std::string> v2{"henry", "theodore", "marcie", "rachael"};
-
-		//atma::vector<int> numbers{1, 2, 3, 4};
-		//numbers.erase(numbers.begin());
 
 		WHEN("v.insert(v2.begin, v2.end) is called")
 		{
 			v.insert(v.begin() + 1, v2.begin(), v2.end());
 
-			THEN("an exact copy is made")
+			THEN("we inserted our range into the middle")
 			{
 				CHECK(!v.empty());
 				CHECK_WHOLE_VECTOR(v, "timothy", "henry", "theodore", "marcie", "rachael", "maria");

@@ -1,9 +1,9 @@
 # ignore visual studio files
 .vs/
-Debug/
-Release/
-x64/
-build/
+.cmake_cache/
+
+# build files
+/out/
 
 # ignore obj folder for CS projects
 project/AtmaCS/obj/

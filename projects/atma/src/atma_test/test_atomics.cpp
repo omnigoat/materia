@@ -1,8 +1,7 @@
 #include <atma/unit_test.hpp>
+#include <atma/types.hpp>
 
-import atma.atomic;
-import atma.types;
-
+import atma;
 
 //
 // I mean, how do we even test that these sort of functions work

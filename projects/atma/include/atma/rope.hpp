@@ -1,9 +1,11 @@
-//module;
+#if 0
+
 
 #include <atma/assert.hpp>
 #include <atma/ranges/core.hpp>
 #include <atma/algorithm.hpp>
 #include <atma/utf/utf8_string.hpp>
+#include <atma/types.hpp>
 
 #include <optional>
 #include <array>
@@ -19,12 +21,6 @@
 #define ATMA_ROPE_DEBUG_BUFFER 1
 
 //export module atma.rope;
-
-import atma.bind;
-import atma.types;
-import atma.memory;
-import atma.intrusive_ptr;
-
 
 
 //
@@ -4223,7 +4219,5 @@ namespace atma::_rope_
 	}
 }
 
-
-
-
+#endif
 

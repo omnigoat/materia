@@ -3,11 +3,12 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include <atma/benchmark.hpp>
 #include <atma/unit_test.hpp>
+#include <atma/types.hpp>
 
 #include <span>
 #include <unordered_map>
 
-import atma.benchmark;
+import atma;
 
 // ::atma::bench::no_optimize<__LINE__>(x)
 #define FORCE_MATERIALIZATION(x) 

@@ -6,8 +6,6 @@
 #include <memory_resource>
 #include <atomic>
 
-
-
 namespace atma
 {
 	// performs the equivalent of ceil(x / y) for integrals

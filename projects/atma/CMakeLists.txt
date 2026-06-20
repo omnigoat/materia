@@ -2,17 +2,16 @@ cmake_minimum_required(VERSION 3.31)
 
 add_library(atma STATIC)
 
-add_compile_options(/lmaoz)
-
 # compile options
 target_compile_options(atma PUBLIC ${MATERIA_CPP_FLAGS})
 
-# dependencies
-target_link_libraries(atma
-	PUBLIC doctest boost)
-
 # includes
-target_include_directories(atma PUBLIC include)
+target_include_directories(atma PUBLIC include
+#	"D:/dev/materia/projects/boost/include"
+)
+
+# dependencies
+target_link_libraries(atma PUBLIC doctest boost)
 
 target_sources(atma 
 	PUBLIC FILE_SET HEADERS
@@ -49,7 +48,6 @@ target_sources(atma
 		include/atma/delegate.hpp
 		include/atma/ebo_pair.hpp
 		include/atma/event.hpp
-		include/atma/flyweight.hpp
 		include/atma/function.hpp
 		include/atma/function_composition.hpp
 		include/atma/functor.hpp
@@ -57,14 +55,10 @@ target_sources(atma
 		include/atma/hash.hpp
 		include/atma/hash_map.hpp
 		include/atma/lockfree_list.hpp
-		include/atma/lockfree_queue.hpp
-		include/atma/logging.hpp
 		include/atma/preprocessor.hpp
 		include/atma/rope.hpp
 		include/atma/shared_memory.hpp
-		include/atma/streams.hpp
 		include/atma/string.hpp
-		include/atma/threading.hpp
 		include/atma/tuple.hpp
 		include/atma/unit_test.hpp)
 
@@ -88,17 +82,23 @@ target_sources(atma PUBLIC
 	FILE_SET modules
 	TYPE CXX_MODULES
 	FILES 
-		modules/aligned_allocator.cppm
-		modules/assert.cppm
-		modules/atomic.cppm
-		modules/benchmark.cppm
-		modules/bind.cppm
-		modules/intrusive_ptr.cppm
-		modules/lockfree_queue.cppm
-		modules/memory.cppm
-		modules/meta.cppm
-		modules/types.cppm
-		modules/vector.cppm)
+		src/atma.cppm
+		src/assert.cppm
+		src/atomic.cppm
+		src/benchmark.cppm
+		src/bind.cppm
+		src/bridge.cppm
+		src/flyweight.cppm
+		src/intrusive_ptr.cppm
+		src/lockfree_queue.cppm
+		src/memory.cppm
+		src/meta.cppm
+		src/rope.cppm
+		src/vector.cppm
+		src/string.cppm
+		src/threading.cppm
+		src/logging.cppm
+		src/streams.cppm)
 
 
 
@@ -108,7 +108,7 @@ target_sources(atma PUBLIC
 #
 add_executable(atma_test)
 
-set_target_properties(atma_test PROPERTIES VS_GLOBAL_BuildStdModules  "false")
+#set_target_properties(atma_test PROPERTIES VS_GLOBAL_BuildStdModules  "false")
 
 target_sources(atma_test PRIVATE
 	src/atma_test/bind_and_function.cpp
@@ -120,10 +120,15 @@ target_sources(atma_test PRIVATE
 	src/atma_test/test_atomics.cpp
 	src/atma_test/test_events.cpp
 	src/atma_test/test_pointers.cpp
-	src/atma_test/test_rope.cpp
 	src/atma_test/test_utf8_string.cpp
 	src/atma_test/test_vector.cpp)
 
-target_link_libraries(atma_test PUBLIC atma)
+# modules
+target_sources(atma_test PUBLIC
+	FILE_SET modules
+	TYPE CXX_MODULES
+	FILES 
+		src/atma_test/test_rope.cppm)
 
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT atma_test)
+target_link_libraries(atma_test PUBLIC atma doctest::doctest)
+

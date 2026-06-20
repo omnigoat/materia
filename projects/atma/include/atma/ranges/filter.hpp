@@ -2,8 +2,8 @@
 
 #include <atma/ranges/core.hpp>
 #include <atma/assert.hpp>
+#include <atma/types.hpp>
 
-import atma.types;
 
 // forward-declares
 namespace atma

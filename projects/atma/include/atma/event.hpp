@@ -1,19 +1,22 @@
+#if 0
 #pragma once
 
 #include <atma/lockfree_queue.hpp>
 #include <atma/flyweight.hpp>
 #include <atma/function.hpp>
 #include <atma/threading.hpp>
-#include <atma/algorithm.hpp>
-#include <atma/arena_allocator.hpp>
-#include <atma/ranges/filter.hpp>
-#include <atma/ranges/map.hpp>
+
 
 #include <functional>
 #include <memory>
 #include <unordered_map>
 #include <map>
 #include <tuple>
+
+//#include <atma/arena_allocator.hpp>
+//#include <atma/algorithm.hpp>
+//#include <atma/ranges/filter.hpp>
+//#include <atma/ranges/map.hpp>
 
 
 namespace atma
@@ -368,7 +371,7 @@ namespace atma::detail
 
 		ATMA_SCOPED_LOCK(bound_systems_mutex)
 		{
-			auto candidate = atma::find_in(event_systems, esbp);
+			auto candidate = std::find(event_systems.begin(), event_systems.end(), esbp);
 			if (candidate == event_systems.end())
 				candidate = event_systems.insert(event_systems.end(), esbp);
 
@@ -504,3 +507,4 @@ namespace atma
 
 }
 
+#endif

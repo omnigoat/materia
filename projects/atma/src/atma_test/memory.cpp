@@ -2,11 +2,12 @@
 #include <atma/string.hpp>
 #include <atma/functor.hpp>
 #include <atma/preprocessor.hpp>
+#include <atma/aligned_allocator.hpp>
+#include <atma/arena_allocator.hpp>
 
 #include <numeric>
 
-import atma.memory;
-
+import atma;
 
 
 

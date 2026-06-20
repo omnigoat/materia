@@ -5,8 +5,9 @@
 #include <atma/function.hpp>
 #include <atma/thread/engine.hpp>
 
-import std;
-import atma.bind;
+//import std;
+import atma;
+//import atma_test;
 
 int mul(int a, int b) { return a * b; }
 int add(int a, int b) { return a + b; }
@@ -34,7 +35,7 @@ struct tm_t
 int what() { return 4; }
 
 
-SCENARIO_OF("bind", "bind works with various things")
+SCENARIO("bind - bind works with various things")
 {
 	GIVEN("a binding to a free-function, and one to am equivalent non-closure lambda")
 	{
@@ -154,7 +155,7 @@ SCENARIO_OF("bind", "bind works with various things")
 
 }
 
-SCENARIO_OF("atma::function", "functions can be constructed")
+SCENARIO("atma::function - construction")
 {
 	GIVEN("a default-constructed function")
 	{

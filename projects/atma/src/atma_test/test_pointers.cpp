@@ -6,8 +6,7 @@
 #include <iostream>
 #include <concepts>
 
-import atma.memory;
-import atma.intrusive_ptr;
+import atma;
 
 #if 0
 class A {};

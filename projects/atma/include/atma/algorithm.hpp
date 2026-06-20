@@ -1,14 +1,11 @@
 #pragma once
 
 #include <atma/tuple.hpp>
+#include <atma/types.hpp>
 
 #include <algorithm>
 #include <optional>
 #include <ranges>
-
-import atma.types;
-import atma.vector;
-import atma.meta;
 
 namespace atma
 {
@@ -89,6 +86,7 @@ namespace atma
 	// -----------
 	//   turns a range into an atma::vector
 	//
+#if 0
 	constexpr inline struct as_vector_t
 	{
 		template <std::ranges::range R>
@@ -103,7 +101,7 @@ namespace atma
 	{
 		return atma::vector<std::ranges::range_value_t<R>>{range.begin(), range.end()};
 	}
-
+#endif
 
 	//
 	// find_in

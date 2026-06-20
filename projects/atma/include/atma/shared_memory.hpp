@@ -1,8 +1,8 @@
 #pragma once
 
 #include <atma/platform/allocation.hpp>
+#include <atma/types.hpp>
 
-import atma.types;
 
 namespace atma
 {
